@@ -1,0 +1,25 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="padding-large">
+    <div class="container">
+        <div class="row justify-content-center text-center py-5">
+            <div class="col-md-8">
+                @if (Model.StatusCode > 0)
+                {
+                    <h1 class="display-1 text-dark">@Model.StatusCode</h1>
+                }
+                <h2 class="text-uppercase text-dark pb-3">@Model.Title</h2>
+                <p class="pb-4">@Model.Message</p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-medium btn-dark text-uppercase btn-rounded-none">Volver al inicio</a>
+
+                @if (Model.ShowRequestId)
+                {
+                    <p class="text-muted pt-4"><small>ID de solicitud: <code>@Model.RequestId</code></small></p>
+                }
+            </div>
+        </div>
+    </div>
+</section>
