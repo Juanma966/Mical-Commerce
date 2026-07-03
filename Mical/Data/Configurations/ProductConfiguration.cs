@@ -55,6 +55,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         // Índice del filtro de catálogo (productos visibles).
         builder.HasIndex(p => new { p.IsDeleted, p.IsActive });
 
+        // Índice GIN trigram para búsqueda parcial por nombre (ILIKE '%term%').
+        builder.HasIndex(p => p.Name)
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops");
+
         // Borrado lógico.
         builder.HasQueryFilter(p => !p.IsDeleted);
 

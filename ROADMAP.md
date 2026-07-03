@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 3 completada (Productos: entidad + SKU + imágenes + CRUD admin + FluentValidation). Falta 1.4 (Google Login), pospuesta.
+**Última actualización:** 2026-07-03 — Fase 4 completada (Catálogo público: /shop con filtro+paginación+búsqueda pg_trgm, detalle con "Sin stock"). Falta 1.4 (Google Login), pospuesta.
 
 ---
 
@@ -81,9 +81,13 @@
   - Verificado en runtime: alta con imagen + SKU correlativo, decimales correctos, validaciones (precio>0, oferta<precio, tipo de imagen), edición con swap de imagen (borra la vieja) y SKU inmutable, soft delete + query filter, logs de auditoría.
 
 ## Fase 4 — Catálogo público
-- [ ] **4.1** `/shop` con paginación y filtro por categoría. ⬜
-- [ ] **4.2** Búsqueda por nombre (ILIKE + índice trigram `pg_trgm`). ⬜
-- [ ] **4.3** Detalle de producto + estado "Sin stock". ⬜
+- [x] **4.1** `/shop` con paginación y filtro por categoría. ✅
+  - `Models/PagedResult<T>`; VMs `ProductCardVm`, `ShopIndexVm`+`CategoryFilterVm`; `ICatalogService`/`CatalogService` (solo productos activos de categorías activas). `ShopController` (`/shop?categoria=&q=&page=`, pageSize 12). Vista `Views/Shop/Index` (filtro por categoría, grilla de cards, paginación). Header: buscador → `/shop`, nav "Tienda".
+- [x] **4.2** Búsqueda por nombre (ILIKE + índice trigram `pg_trgm`). ✅
+  - Extensión `pg_trgm` + índice GIN `gin_trgm_ops` sobre `Products.Name` (migración `AddProductSearchIndex`). Búsqueda con `EF.Functions.ILike(Name, %q%)`.
+- [x] **4.3** Detalle de producto + estado "Sin stock". ✅
+  - `ProductController` (`/product/{id:int}`) + `ProductDetailVm` + vista `Views/Product/Details` (galería, precio/oferta, breadcrumb, botón "Agregar al carrito" deshabilitado hasta Fase 5; "Sin stock" si Stock≤0). Productos ocultos (inactivos o de categoría inactiva) → 404.
+  - Verificado en runtime: listado (14 visibles, ocultos excluidos), paginación (2 págs), filtro por categoría, búsqueda trigram, detalle con oferta/sin-stock, 404 en ocultos/inexistentes.
 
 ## Fase 5 — Carrito (solo cliente)
 - [ ] **5.1** `cart.js` (LocalStorage) + UI de carrito. ⬜
@@ -122,3 +126,4 @@
 | 2026-07-03 | Fase 2.1 | Entidad `Category` + `CategoryConfiguration` (índice único parcial + query filter) + migración `AddCategory`. Verificado en Postgres. |
 | 2026-07-03 | Fase 2.2 | `CategoryService` (CRUD, unicidad case-insensitive, soft delete, audit log) + CRUD admin de categorías. Verificado en runtime. |
 | 2026-07-03 | Fase 3 | Productos: entidad+config+migración (3.1), `ISkuGenerator`+`IFileStorageService` (3.2), CRUD admin + FluentValidation (3.3). Fixes: cultura invariante (decimales) y OverridePropertyName. Verificado en runtime. |
+| 2026-07-03 | Fase 4 | Catálogo público: `ICatalogService`, `/shop` (filtro+paginación+búsqueda `pg_trgm`), `/product/{id}` (detalle + "Sin stock"). Header enlaza a la tienda. Verificado en runtime. |

@@ -4,16 +4,15 @@
 *@
 <div class="search-popup">
     <div class="search-popup-container">
-        <form role="search" method="get" class="search-form" action="">
-            <input type="search" id="search-form" class="search-field" placeholder="Buscar y presionar enter" value="" name="s" />
+        <form role="search" method="get" class="search-form" asp-controller="Shop" asp-action="Index">
+            <input type="search" id="search-form" class="search-field" placeholder="Buscar y presionar enter" value="" name="q" />
             <button type="submit" class="search-submit"><svg class="search"><use xlink:href="#search"></use></svg></button>
         </form>
 
-        <h5 class="cat-list-title">Categorías</h5>
+        <h5 class="cat-list-title">Explorar</h5>
 
         <ul class="cat-list">
-            <li class="cat-list-item"><a href="#" title="Regalería">Regalería</a></li>
-            <li class="cat-list-item"><a href="#" title="Imprenta">Imprenta</a></li>
+            <li class="cat-list-item"><a asp-controller="Shop" asp-action="Index" title="Ver toda la tienda">Ver toda la tienda</a></li>
         </ul>
     </div>
 </div>
@@ -45,7 +44,7 @@
                             <a class="nav-link me-4" href="#company-services">Servicios</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-4" href="#mobile-products">Productos</a>
+                            <a class="nav-link me-4" asp-controller="Shop" asp-action="Index">Tienda</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link me-4" href="#latest-blog">Novedades</a>

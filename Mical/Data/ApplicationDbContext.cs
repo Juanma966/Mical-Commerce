@@ -30,5 +30,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         // Secuencia para el correlativo del SKU de productos (concurrencia segura).
         modelBuilder.HasSequence<long>("product_sku_seq").StartsAt(1).IncrementsBy(1);
+
+        // Extensión trigram para acelerar la búsqueda ILIKE por nombre (Fase 4.2).
+        modelBuilder.HasPostgresExtension("pg_trgm");
     }
 }
