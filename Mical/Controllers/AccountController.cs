@@ -1,4 +1,5 @@
 using Mical.Entities;
+using Mical.Helpers;
 using Mical.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -56,6 +57,7 @@ public class AccountController : Controller
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
+            await _userManager.AddToRoleAsync(user, Roles.Usuario);
             _logger.LogInformation("Nuevo usuario registrado: {Email}", model.Email);
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToLocal(returnUrl);

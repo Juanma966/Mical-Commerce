@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Mical.Data;
+using Mical.Data.Seed;
 using Mical.Entities;
 using Mical.Extensions;
 using Serilog;
@@ -101,6 +102,12 @@ try
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    // Seed inicial: roles de la aplicación + administrador. Idempotente.
+    using (var scope = app.Services.CreateScope())
+    {
+        await DbInitializer.SeedAsync(scope.ServiceProvider);
+    }
 
     app.Run();
 }

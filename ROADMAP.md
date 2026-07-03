@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 1.2 completada (registro / login / logout / perfil / cambio de contraseña, validado en runtime).
+**Última actualización:** 2026-07-03 — Fase 1.3 completada (roles + `DbInitializer` con seed de admin, validado en runtime).
 
 ---
 
@@ -44,7 +44,11 @@
   - `AccountController`: Register, Login, Logout (POST+antiforgery), Profile (ver/editar `FullName`+`PhoneNumber`; email solo lectura), ChangePassword, Denied. `RedirectToLocal` con `Url.IsLocalUrl` (anti open-redirect); login con `lockoutOnFailure:true` y mensaje genérico; errores de Identity traducidos.
   - Vistas Bootstrap en `Views/Account/` + validación cliente (`_ValidationScriptsPartial`). Header con ícono usuario → Perfil/Login + botón Salir según sesión.
   - Verificado en runtime (curl, https): registro→auto-login→home, `/Profile` protegido (302 a login si anónimo), login ok/fallido, registro duplicado, logout, cambio de contraseña + re-login con clave nueva. Usuario de prueba borrado.
-- [ ] **1.3** Roles (Administrador, Usuario) + `DbInitializer` (seed de roles y admin inicial). ⬜
+- [x] **1.3** Roles (Administrador, Usuario) + `DbInitializer` (seed de roles y admin inicial). ✅
+  - `Helpers/Roles.cs` (constantes `Administrador`/`Usuario` + `All`).
+  - `Data/Seed/DbInitializer.cs`: crea roles y admin inicial de forma idempotente. Credenciales del admin fuera del código: `AdminSeed:Email`/`AdminSeed:FullName` en `appsettings.json`, `AdminSeed:Password` en user-secrets (dev). Admin creado con `EmailConfirmed=true`. Invocado en `Program.cs` en un scope antes de `app.Run()`.
+  - Registro público asigna rol `Usuario` automáticamente.
+  - Verificado en runtime: seeder crea roles + `admin@mical.com` (rol Administrador); registro de `cliente@test.com` → rol Usuario. Test user borrado; admin conservado.
 - [ ] **1.4** Google Login. ⬜
 - [ ] **1.5** Autorización por rol en `/Admin` + políticas. ⬜
 
@@ -94,3 +98,4 @@
 | 2026-07-02 | Fase 0.4 | Serilog (consola+archivo) + request logging + página de error amigable + headers de seguridad. Verificado en runtime. **Fase 0 cerrada.** |
 | 2026-07-03 | Fase 1.1 | ASP.NET Identity (cookies) + `ApplicationUser` + `IdentityDbContext`. Migración `AddIdentity` aplicada; 7 tablas `AspNet*` verificadas en Postgres. |
 | 2026-07-03 | Fase 1.2 | `AccountController` + ViewModels + vistas: registro/login/logout/perfil/cambio de contraseña. Flujo completo verificado en runtime con curl. |
+| 2026-07-03 | Fase 1.3 | Roles + `DbInitializer` (seed idempotente de roles y admin). Registro asigna rol Usuario. Verificado en runtime + Postgres. |
