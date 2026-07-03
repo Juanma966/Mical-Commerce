@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>@ViewData["Title"] - Admin Mical</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" type="text/css" href="~/css/bootstrap.min.css">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="bg-light">
+    <header class="navbar navbar-dark bg-dark sticky-top flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+            Mical · Admin
+        </a>
+        <div class="d-flex align-items-center ms-auto pe-3">
+            <span class="text-white-50 me-3 small d-none d-sm-inline">@User.Identity?.Name</span>
+            <a class="text-white-50 me-3 small text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index" target="_blank">Ver sitio</a>
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                <button type="submit" class="btn btn-sm btn-outline-light">Salir</button>
+            </form>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-white sidebar border-end min-vh-100 py-3">
+                <ul class="nav flex-column px-2">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link text-muted" href="#" title="Disponible en la Fase 2">Categorías</a></li>
+                    <li class="nav-item"><a class="nav-link text-muted" href="#" title="Disponible en la Fase 3">Productos</a></li>
+                    <li class="nav-item"><a class="nav-link text-muted" href="#" title="Disponible en la Fase 6">Pedidos</a></li>
+                    <li class="nav-item"><a class="nav-link text-muted" href="#" title="Disponible más adelante">Usuarios</a></li>
+                </ul>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/js/jquery-1.11.0.min.js"></script>
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

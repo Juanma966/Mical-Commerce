@@ -4,6 +4,7 @@ using Mical.Data;
 using Mical.Data.Seed;
 using Mical.Entities;
 using Mical.Extensions;
+using Mical.Helpers;
 using Serilog;
 
 // Logger de arranque: captura errores incluso antes de construir el host.
@@ -57,6 +58,13 @@ try
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
+    // Políticas de autorización.
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy(Policies.AdminOnly, policy =>
+            policy.RequireRole(Roles.Administrador));
+    });
+
     // Configuración de la cookie de autenticación.
     builder.Services.ConfigureApplicationCookie(options =>
     {
@@ -98,6 +106,11 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    // Ruta de áreas (debe ir antes de la ruta por defecto). /Admin → Dashboard/Index.
+    app.MapControllerRoute(
+        name: "areas",
+        pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
     app.MapControllerRoute(
         name: "default",

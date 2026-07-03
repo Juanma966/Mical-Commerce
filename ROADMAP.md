@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 1.3 completada (roles + `DbInitializer` con seed de admin, validado en runtime).
+**Última actualización:** 2026-07-03 — Fase 1.5 completada (autorización por rol en `/Admin` + política `AdminOnly`). Falta 1.4 (Google Login), pospuesta.
 
 ---
 
@@ -49,8 +49,12 @@
   - `Data/Seed/DbInitializer.cs`: crea roles y admin inicial de forma idempotente. Credenciales del admin fuera del código: `AdminSeed:Email`/`AdminSeed:FullName` en `appsettings.json`, `AdminSeed:Password` en user-secrets (dev). Admin creado con `EmailConfirmed=true`. Invocado en `Program.cs` en un scope antes de `app.Run()`.
   - Registro público asigna rol `Usuario` automáticamente.
   - Verificado en runtime: seeder crea roles + `admin@mical.com` (rol Administrador); registro de `cliente@test.com` → rol Usuario. Test user borrado; admin conservado.
-- [ ] **1.4** Google Login. ⬜
-- [ ] **1.5** Autorización por rol en `/Admin` + políticas. ⬜
+- [ ] **1.4** Google Login. ⬜ *(pospuesta; se hará después de 1.5)*
+- [x] **1.5** Autorización por rol en `/Admin` + políticas. ✅
+  - `Helpers/Policies.cs` (`AdminOnly`) + `AddAuthorization` con `RequireRole(Administrador)` en `Program.cs`.
+  - Área Admin: `AdminBaseController` (`[Area("Admin")]` + `[Authorize(Policy = AdminOnly)]`) del que heredan todos los controladores del panel; `DashboardController` mínimo. Vistas del área (`_ViewImports`/`_ViewStart`/`Shared/_AdminLayout` con sidebar + `Dashboard/Index`).
+  - Ruta de áreas registrada antes de la default: `/Admin` → `Dashboard/Index`.
+  - Verificado en runtime: anónimo→login, usuario `Usuario`→`/account/denied` (Acceso denegado), admin→200 con el panel.
 
 ## Fase 2 — Categorías (CRUD admin)
 - [ ] **2.1** Entidad + configuración + migración. ⬜
@@ -99,3 +103,4 @@
 | 2026-07-03 | Fase 1.1 | ASP.NET Identity (cookies) + `ApplicationUser` + `IdentityDbContext`. Migración `AddIdentity` aplicada; 7 tablas `AspNet*` verificadas en Postgres. |
 | 2026-07-03 | Fase 1.2 | `AccountController` + ViewModels + vistas: registro/login/logout/perfil/cambio de contraseña. Flujo completo verificado en runtime con curl. |
 | 2026-07-03 | Fase 1.3 | Roles + `DbInitializer` (seed idempotente de roles y admin). Registro asigna rol Usuario. Verificado en runtime + Postgres. |
+| 2026-07-03 | Fase 1.5 | Área Admin protegida: política `AdminOnly`, `AdminBaseController`, `DashboardController` + layout. Ruta de áreas. Verificado (anónimo/usuario/admin). 1.4 pospuesta. |
