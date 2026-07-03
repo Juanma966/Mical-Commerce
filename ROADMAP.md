@@ -57,7 +57,11 @@
   - Verificado en runtime: anónimo→login, usuario `Usuario`→`/account/denied` (Acceso denegado), admin→200 con el panel.
 
 ## Fase 2 — Categorías (CRUD admin)
-- [ ] **2.1** Entidad + configuración + migración. ⬜
+- [x] **2.1** Entidad + configuración + migración. ✅
+  - Interfaces `Entities/Common/IAuditable` (CreatedAt/UpdatedAt) e `ISoftDeletable` (IsDeleted) para reutilizar.
+  - `Entities/Category.cs` (Name único, Description, ImagePath, IsActive, timestamps, soft delete).
+  - `Data/Configurations/CategoryConfiguration.cs`: max lengths, defaults, índice único de `Name` filtrado por `IsDeleted=false`, query filter global de soft delete. `DbSet<Category>` en el contexto.
+  - Migración `AddCategory` aplicada. Verificado en Postgres: tabla + índice único parcial OK.
 - [ ] **2.2** Service + validación + Area Admin CRUD + auditoría. ⬜
 
 ## Fase 3 — Productos

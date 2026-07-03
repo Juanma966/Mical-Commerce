@@ -17,12 +17,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
     }
 
+    public DbSet<Category> Categories => Set<Category>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // Carga automática de todas las configuraciones IEntityTypeConfiguration<T>
-        // ubicadas en Data/Configurations (todavía no hay ninguna).
+        // ubicadas en Data/Configurations.
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
 }
