@@ -23,6 +23,9 @@ public class HomeController : Controller
         return View();
     }
 
+    // La página de error se re-ejecuta con el método original (a veces POST) vía
+    // UseStatusCodePagesWithReExecute; no debe exigir antiforgery.
+    [IgnoreAntiforgeryToken]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error(int? statusCode = null)
     {
@@ -36,6 +39,7 @@ public class HomeController : Controller
         {
             404 => ("Página no encontrada", "La página que buscás no existe o fue movida."),
             403 => ("Acceso denegado", "No tenés permisos para acceder a esta página."),
+            429 => ("Demasiados intentos", "Hiciste muchas solicitudes en poco tiempo. Esperá un momento e intentá de nuevo."),
             _ => ("Algo salió mal", "Ocurrió un error inesperado. Intentá nuevamente en unos minutos.")
         };
 

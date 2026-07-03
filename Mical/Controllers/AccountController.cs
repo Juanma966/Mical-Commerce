@@ -4,6 +4,7 @@ using Mical.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Mical.Controllers;
 
@@ -40,7 +41,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
     public async Task<IActionResult> Register(RegisterVm model, string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -82,7 +83,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
     public async Task<IActionResult> Login(LoginVm model, string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;

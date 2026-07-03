@@ -1,7 +1,11 @@
 using System.Globalization;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Mical.Data;
 using Mical.Data.Interceptors;
 using Mical.Data.Seed;
@@ -26,10 +30,29 @@ try
         .Enrich.FromLogContext());
 
     // Add services to the container.
-    builder.Services.AddControllersWithViews();
+    // Antiforgery global: valida el token en todo POST/PUT/DELETE (defensa CSRF).
+    // Los endpoints de solo lectura que no lo necesitan usan [IgnoreAntiforgeryToken].
+    builder.Services.AddControllersWithViews(options =>
+        options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddApplicationServices();
     builder.Services.AddApplicationValidation();
+
+    // Rate limiting: limita los intentos en los endpoints de autenticación
+    // (login/registro) por IP, para frenar fuerza bruta y abuso automatizado.
+    // Complementa el lockout de Identity (5 intentos / 15 min por cuenta).
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.AddPolicy(RateLimitPolicies.Auth, httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(1)
+                }));
+    });
 
     // Base de datos: PostgreSQL vía EF Core (Npgsql).
     // La cadena de conexión se resuelve desde configuración/entorno (nunca hardcodeada).
@@ -43,7 +66,12 @@ try
 
     builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
         options.UseNpgsql(connectionString)
-               .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
+               .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>())
+               // OrderItem tiene navegación requerida a Product (soft-deletable, con
+               // query filter). Usamos snapshots y nunca navegamos esa relación en
+               // consultas filtradas, así que el warning no aplica.
+               .ConfigureWarnings(w => w.Ignore(
+                   CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning)));
 
     // ASP.NET Identity con autenticación por cookies (sin JWT).
     // Los flujos de registro/login se implementan en la Fase 1.2 y los roles en 1.3;
@@ -97,6 +125,17 @@ try
     }
     else
     {
+        // Detrás de un proxy inverso (nginx, etc.): respeta X-Forwarded-For/Proto
+        // para que HTTPS redirect, la cookie Secure y la IP del rate limiter sean correctas.
+        // IMPORTANTE: en un despliegue real, restringir KnownProxies/KnownNetworks al proxy.
+        var fwd = new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        };
+        fwd.KnownNetworks.Clear();
+        fwd.KnownProxies.Clear();
+        app.UseForwardedHeaders(fwd);
+
         app.UseExceptionHandler("/Home/Error");
         // HSTS: fuerza HTTPS en el navegador. 30 días por defecto.
         app.UseHsts();
@@ -123,6 +162,8 @@ try
     });
 
     app.UseRouting();
+
+    app.UseRateLimiter();
 
     app.UseAuthentication();
     app.UseAuthorization();

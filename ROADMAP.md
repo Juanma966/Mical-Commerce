@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 7 completada (Auditoría por interceptor solo-admin + Dashboard con métricas). Falta 1.4 (Google Login), pospuesta.
+**Última actualización:** 2026-07-03 — Fase 8 completada (endurecimiento prod). **Roadmap completo salvo la 1.4 (Google Login), opcional.**
 
 ---
 
@@ -123,9 +123,14 @@
   - Verificado en runtime: métricas correctas (ingresos por snapshot del pedido, no por precio actual).
 
 ## Fase 8 — Endurecimiento para producción
-- [ ] **8.1** `appsettings.Production.json`, secretos por entorno, HTTPS/HSTS. ⬜
-- [ ] **8.2** Revisión de validaciones, antiforgery (CSRF), rate limiting en login + lockout por intentos fallidos. ⬜
-- [ ] **8.3** Checklist de producción + pruebas de humo del flujo completo. ⬜
+- [x] **8.1** `appsettings.Production.json`, secretos por entorno, HTTPS/HSTS. ✅
+  - `appsettings.Production.json` (solo config no sensible; connection string y `AdminSeed:Password` por variables de entorno `__`). HTTPS/HSTS ya estaban. `UseForwardedHeaders` en prod (X-Forwarded-For/Proto) para proxy inverso — con nota de restringir `KnownProxies` en el deploy.
+- [x] **8.2** Revisión de validaciones, antiforgery (CSRF), rate limiting en login + lockout por intentos fallidos. ✅
+  - Antiforgery **global** (`AutoValidateAntiforgeryTokenAttribute`) en todo POST/PUT/DELETE; `/cart/rehydrate` con `[IgnoreAntiforgeryToken]` (solo lectura) y `/Home/Error` idem (se re-ejecuta por POST). **Rate limiting** por IP (fixed window 10/min, política `auth`) en login y registro, además del lockout de Identity (5/15min). Validaciones DataAnnotations+FluentValidation ya en su lugar.
+  - Fix: `/Home/Error` con `[IgnoreAntiforgeryToken]` para que el 429/errores en POST muestren la página amigable (antes el re-execute daba 400). Warning de query filter Product↔OrderItem silenciado (usamos snapshots).
+- [x] **8.3** Checklist de producción + pruebas de humo del flujo completo. ✅
+  - `PRODUCTION.md` (secretos por entorno, DB/migraciones, HTTPS/proxy, seguridad incluida, checklist, pruebas de humo).
+  - Verificado en runtime: rate limiting devuelve 429 tras el límite (login legítimo sigue OK), antiforgery global activo, arranque sin warnings, y **smoke test end-to-end** (home/shop/dashboard, crear categoría+producto, registro, checkout con descuento de stock, mis pedidos, cambio de estado admin, auditoría) todo verde.
 
 ---
 
@@ -150,3 +155,4 @@
 | 2026-07-03 | Fase 6.1 | Checkout: entidades Order/OrderItem + `OrderService.CheckoutAsync` (transacción, descuento de stock, xmin) + `/checkout` + confirmación. Verificado en runtime. |
 | 2026-07-03 | Fase 6.2/6.3 | "Mis pedidos" (usuario) + gestión admin de pedidos: máquina de estados, cambio de estado y reposición de stock al cancelar (solo si no estaba Entregado). Verificado en runtime. |
 | 2026-07-03 | Fase 7 | Auditoría por interceptor de SaveChanges (solo admin, tabla `AuditLogs`) + Dashboard admin con métricas. Verificado en runtime. |
+| 2026-07-03 | Fase 8 | Endurecimiento prod: rate limiting (login/registro), antiforgery global, forwarded headers, `appsettings.Production.json`, `PRODUCTION.md`. Smoke test completo verde. |
