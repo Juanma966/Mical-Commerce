@@ -30,13 +30,13 @@
                 <div class="mb-3">
                     @if (Model.IsOnSale)
                     {
-                        <span class="text-decoration-line-through text-muted me-2 fs-5">$@Model.Price.ToString("N2")</span>
-                        <span class="fs-3 fw-bold">$@Model.EffectivePrice.ToString("N2")</span>
+                        <span class="text-decoration-line-through text-muted me-2 fs-5">@Model.Price.ToMoney()</span>
+                        <span class="fs-3 fw-bold">@Model.EffectivePrice.ToMoney()</span>
                         <span class="badge bg-success ms-2">Oferta</span>
                     }
                     else
                     {
-                        <span class="fs-3 fw-bold">$@Model.EffectivePrice.ToString("N2")</span>
+                        <span class="fs-3 fw-bold">@Model.EffectivePrice.ToMoney()</span>
                     }
                 </div>
 

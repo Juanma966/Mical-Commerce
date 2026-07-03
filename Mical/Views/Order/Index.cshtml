@@ -37,7 +37,7 @@
                                 <td class="fw-semibold">@o.OrderNumber</td>
                                 <td>@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
                                 <td class="text-center">@o.ItemCount</td>
-                                <td class="text-end">$@o.Total.ToString("N2")</td>
+                                <td class="text-end">@o.Total.ToMoney()</td>
                                 <td><span class="badge @badge.Css">@badge.Text</span></td>
                                 <td class="text-end">
                                     <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@o.Id">Ver</a>

@@ -77,12 +77,12 @@
                                             <div>
                                                 @if (item.IsOnSale)
                                                 {
-                                                    <span class="text-decoration-line-through text-muted me-1">$@item.Price.ToString("N2")</span>
-                                                    <strong>$@item.EffectivePrice.ToString("N2")</strong>
+                                                    <span class="text-decoration-line-through text-muted me-1">@item.Price.ToMoney()</span>
+                                                    <strong>@item.EffectivePrice.ToMoney()</strong>
                                                 }
                                                 else
                                                 {
-                                                    <strong>$@item.EffectivePrice.ToString("N2")</strong>
+                                                    <strong>@item.EffectivePrice.ToMoney()</strong>
                                                 }
                                             </div>
                                         </div>

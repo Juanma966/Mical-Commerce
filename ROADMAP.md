@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 8 completada (endurecimiento prod). **Roadmap completo salvo la 1.4 (Google Login), opcional.**
+**Última actualización:** 2026-07-03 — **ROADMAP COMPLETO** (todas las fases incl. 1.4 Google Login). + display de precios en es-AR.
 
 ---
 
@@ -49,7 +49,10 @@
   - `Data/Seed/DbInitializer.cs`: crea roles y admin inicial de forma idempotente. Credenciales del admin fuera del código: `AdminSeed:Email`/`AdminSeed:FullName` en `appsettings.json`, `AdminSeed:Password` en user-secrets (dev). Admin creado con `EmailConfirmed=true`. Invocado en `Program.cs` en un scope antes de `app.Run()`.
   - Registro público asigna rol `Usuario` automáticamente.
   - Verificado en runtime: seeder crea roles + `admin@mical.com` (rol Administrador); registro de `cliente@test.com` → rol Usuario. Test user borrado; admin conservado.
-- [ ] **1.4** Google Login. ⬜ *(pospuesta; se hará después de 1.5)*
+- [x] **1.4** Google Login. ✅
+  - Paquete `Microsoft.AspNetCore.Authentication.Google` 8.0.10. En `Program.cs` se agrega `AddGoogle` **solo si hay credenciales** (`Authentication:Google:ClientId/Secret` por user-secrets/entorno); si no, la app arranca igual sin el botón.
+  - `AccountController.ExternalLogin` (POST → Challenge) + `ExternalLoginCallback` (GET → login si ya existe el login externo; si no, crea/vincula la cuenta por email, asigna rol `Usuario`, y agrega el login). Login/Register muestran "Continuar con Google" solo si el esquema está configurado; aviso de error vía `TempData["LoginError"]`.
+  - Verificado en runtime: con creds dummy el botón aparece y el challenge redirige a `accounts.google.com`; sin creds no aparece y el login normal sigue OK. *(El flujo OAuth completo requiere credenciales reales de Google Cloud Console + cuenta Google.)*
 - [x] **1.5** Autorización por rol en `/Admin` + políticas. ✅
   - `Helpers/Policies.cs` (`AdminOnly`) + `AddAuthorization` con `RequireRole(Administrador)` en `Program.cs`.
   - Área Admin: `AdminBaseController` (`[Area("Admin")]` + `[Authorize(Policy = AdminOnly)]`) del que heredan todos los controladores del panel; `DashboardController` mínimo. Vistas del área (`_ViewImports`/`_ViewStart`/`Shared/_AdminLayout` con sidebar + `Dashboard/Index`).
@@ -156,3 +159,4 @@
 | 2026-07-03 | Fase 6.2/6.3 | "Mis pedidos" (usuario) + gestión admin de pedidos: máquina de estados, cambio de estado y reposición de stock al cancelar (solo si no estaba Entregado). Verificado en runtime. |
 | 2026-07-03 | Fase 7 | Auditoría por interceptor de SaveChanges (solo admin, tabla `AuditLogs`) + Dashboard admin con métricas. Verificado en runtime. |
 | 2026-07-03 | Fase 8 | Endurecimiento prod: rate limiting (login/registro), antiforgery global, forwarded headers, `appsettings.Production.json`, `PRODUCTION.md`. Smoke test completo verde. |
+| 2026-07-03 | Fase 1.4 + UX | Google Login (esquema externo condicional a credenciales) + display de precios en formato es-AR (`ToMoney()` + `toLocaleString` en JS). Verificado en runtime. |

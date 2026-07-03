@@ -1,7 +1,9 @@
+@using Microsoft.AspNetCore.Authentication
 @model RegisterVm
 @{
     ViewData["Title"] = "Crear cuenta";
     var returnUrl = ViewData["ReturnUrl"] as string;
+    var externalLogins = ViewData["ExternalLogins"] as List<AuthenticationScheme> ?? new();
 }
 
 <section class="auth-section py-5" style="margin-top:100px;">
@@ -42,6 +44,20 @@
 
                             <button type="submit" class="btn btn-dark w-100 py-2">Crear cuenta</button>
                         </form>
+
+                        @if (externalLogins.Count > 0)
+                        {
+                            <div class="text-center text-muted my-3">o</div>
+                            @foreach (var scheme in externalLogins)
+                            {
+                                <form asp-action="ExternalLogin" asp-controller="Account" asp-route-returnUrl="@returnUrl" method="post">
+                                    <input type="hidden" name="provider" value="@scheme.Name" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100 py-2">
+                                        Continuar con @scheme.DisplayName
+                                    </button>
+                                </form>
+                            }
+                        }
 
                         <p class="text-center mt-4 mb-0">
                             ¿Ya tenés cuenta?

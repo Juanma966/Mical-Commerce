@@ -69,7 +69,7 @@
             var $cartJson = document.getElementById("CartJson");
             var $form = document.getElementById("checkout-form");
 
-            function money(n) { return "$" + Number(n).toFixed(2); }
+            function money(n) { return "$" + Number(n).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
             function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; }
 
             function syncCartJson() {
