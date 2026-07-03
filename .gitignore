@@ -489,7 +489,8 @@ Mical/wwwroot/uploads/products/*
 !Mical/wwwroot/uploads/products/.gitkeep
 
 # Secretos y configuración local de producción
-appsettings.Production.json
+# appsettings.Production.json SÍ se versiona (no contiene secretos: la connection
+# string y AdminSeed:Password van por variables de entorno). Ver PRODUCTION.md.
 appsettings.*.Local.json
 
 # Logs de Serilog
