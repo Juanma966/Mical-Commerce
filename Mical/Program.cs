@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Mical.Data;
+using Mical.Entities;
 using Mical.Extensions;
 using Serilog;
 
@@ -31,6 +33,42 @@ try
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(connectionString));
 
+    // ASP.NET Identity con autenticación por cookies (sin JWT).
+    // Los flujos de registro/login se implementan en la Fase 1.2 y los roles en 1.3;
+    // aquí solo se establece la infraestructura y las políticas base.
+    builder.Services
+        .AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            // Contraseñas: requisitos razonables sin ser hostiles.
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = false;
+
+            // Bloqueo por intentos fallidos (mitiga fuerza bruta).
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
+            // Cada email es único y el usuario debe tener email.
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
+
+    // Configuración de la cookie de autenticación.
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;                       // no accesible desde JS (mitiga XSS)
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+        options.SlidingExpiration = true;
+        options.LoginPath = "/account/login";
+        options.LogoutPath = "/account/logout";
+        options.AccessDeniedPath = "/account/denied";
+    });
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
@@ -57,6 +95,7 @@ try
 
     app.UseRouting();
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllerRoute(

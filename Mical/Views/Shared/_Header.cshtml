@@ -58,11 +58,27 @@
                                             <svg class="search"><use xlink:href="#search"></use></svg>
                                         </a>
                                     </li>
-                                    <li class="pe-3">
-                                        <a href="#">
-                                            <svg class="user"><use xlink:href="#user"></use></svg>
-                                        </a>
-                                    </li>
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <li class="pe-3">
+                                            <a asp-controller="Account" asp-action="Profile" title="Mi perfil">
+                                                <svg class="user"><use xlink:href="#user"></use></svg>
+                                            </a>
+                                        </li>
+                                        <li class="pe-3">
+                                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                                <button type="submit" class="btn btn-link p-0 text-reset text-decoration-none" title="Cerrar sesión">Salir</button>
+                                            </form>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="pe-3">
+                                            <a asp-controller="Account" asp-action="Login" title="Iniciar sesión">
+                                                <svg class="user"><use xlink:href="#user"></use></svg>
+                                            </a>
+                                        </li>
+                                    }
                                     <li>
                                         <a href="#">
                                             <svg class="cart"><use xlink:href="#cart"></use></svg>

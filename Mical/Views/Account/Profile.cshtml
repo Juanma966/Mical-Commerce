@@ -1,0 +1,61 @@
+@model ProfileVm
+@{
+    ViewData["Title"] = "Mi perfil";
+    var status = TempData["StatusMessage"] as string;
+}
+
+<section class="auth-section py-5" style="margin-top:100px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <h1 class="h3 mb-4">Mi perfil</h1>
+
+                @if (!string.IsNullOrEmpty(status))
+                {
+                    <div class="alert alert-success" role="alert">@status</div>
+                }
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <form asp-action="Profile" method="post" novalidate>
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" readonly disabled />
+                                <div class="form-text">El email de la cuenta no se puede cambiar por ahora.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="FullName" class="form-label"></label>
+                                <input asp-for="FullName" class="form-control" autocomplete="name" />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="PhoneNumber" class="form-label"></label>
+                                <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <p class="text-muted small mb-4">Miembro desde @Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</p>
+
+                            <button type="submit" class="btn btn-dark py-2 px-4">Guardar cambios</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-action="ChangePassword">Cambiar contraseña</a>
+                    <form asp-action="Logout" method="post" class="m-0">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Cerrar sesión</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

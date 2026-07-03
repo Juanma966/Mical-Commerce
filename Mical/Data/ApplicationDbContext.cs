@@ -1,13 +1,16 @@
+using Mical.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mical.Data;
 
 /// <summary>
-/// Contexto de EF Core de la aplicación. Por ahora vacío (Fase 0.3).
-/// En la Fase 1 pasará a heredar de IdentityDbContext&lt;ApplicationUser&gt;,
-/// y a partir de la Fase 2 se irán agregando los DbSet y sus configuraciones.
+/// Contexto de EF Core de la aplicación. Hereda de IdentityDbContext para
+/// incorporar las tablas estándar de ASP.NET Identity (AspNetUsers, AspNetRoles,
+/// etc.) usando <see cref="ApplicationUser"/> como usuario.
+/// A partir de la Fase 2 se irán agregando los DbSet del dominio y sus configuraciones.
 /// </summary>
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
