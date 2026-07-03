@@ -96,20 +96,6 @@ try
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
-    // Google Login (esquema OAuth externo sobre la misma cookie de Identity).
-    // Solo se activa si hay credenciales configuradas (por user-secrets/entorno),
-    // así la app arranca igual sin ellas. Ver PRODUCTION.md.
-    var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
-    var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-    if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
-    {
-        builder.Services.AddAuthentication().AddGoogle(options =>
-        {
-            options.ClientId = googleClientId;
-            options.ClientSecret = googleClientSecret;
-        });
-    }
-
     // Políticas de autorización.
     builder.Services.AddAuthorization(options =>
     {

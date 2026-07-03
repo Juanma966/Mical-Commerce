@@ -12,15 +12,10 @@ En producción, estos valores se pasan por **variables de entorno** (no van en
 |---|---|
 | `ConnectionStrings__DefaultConnection` | Cadena de conexión a PostgreSQL. |
 | `AdminSeed__Password` | Contraseña del admin inicial (el seeder lo crea al arrancar). |
-| `Authentication__Google__ClientId` | (Opcional) Client ID de Google OAuth. |
-| `Authentication__Google__ClientSecret` | (Opcional) Client Secret de Google OAuth. |
 | `ASPNETCORE_ENVIRONMENT` | `Production`. |
 
-> **Google Login**: solo se activa si `Authentication:Google:ClientId` y
-> `ClientSecret` están configurados; si no, el botón "Continuar con Google" no
-> aparece y el login por email/contraseña funciona normalmente. Crear las
-> credenciales en Google Cloud Console (OAuth 2.0) y registrar el redirect URI
-> `https://<dominio>/signin-google`. En dev se setean con user-secrets.
+> Autenticación **solo por ASP.NET Identity** (email + contraseña). No hay login
+> con proveedores externos.
 
 > El doble guion bajo `__` es el separador de secciones en variables de entorno.
 > Si `AdminSeed__Password` no está seteada, el seeder omite crear el admin (loguea un warning).

@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — **ROADMAP COMPLETO** (todas las fases incl. 1.4 Google Login). + display de precios en es-AR.
+**Última actualización:** 2026-07-03 — **ROADMAP COMPLETO** (Fases 0-8). Precios en es-AR. **Google Login descartado por decisión: solo ASP.NET Identity.**
 
 ---
 
@@ -49,10 +49,7 @@
   - `Data/Seed/DbInitializer.cs`: crea roles y admin inicial de forma idempotente. Credenciales del admin fuera del código: `AdminSeed:Email`/`AdminSeed:FullName` en `appsettings.json`, `AdminSeed:Password` en user-secrets (dev). Admin creado con `EmailConfirmed=true`. Invocado en `Program.cs` en un scope antes de `app.Run()`.
   - Registro público asigna rol `Usuario` automáticamente.
   - Verificado en runtime: seeder crea roles + `admin@mical.com` (rol Administrador); registro de `cliente@test.com` → rol Usuario. Test user borrado; admin conservado.
-- [x] **1.4** Google Login. ✅
-  - Paquete `Microsoft.AspNetCore.Authentication.Google` 8.0.10. En `Program.cs` se agrega `AddGoogle` **solo si hay credenciales** (`Authentication:Google:ClientId/Secret` por user-secrets/entorno); si no, la app arranca igual sin el botón.
-  - `AccountController.ExternalLogin` (POST → Challenge) + `ExternalLoginCallback` (GET → login si ya existe el login externo; si no, crea/vincula la cuenta por email, asigna rol `Usuario`, y agrega el login). Login/Register muestran "Continuar con Google" solo si el esquema está configurado; aviso de error vía `TempData["LoginError"]`.
-  - Verificado en runtime: con creds dummy el botón aparece y el challenge redirige a `accounts.google.com`; sin creds no aparece y el login normal sigue OK. *(El flujo OAuth completo requiere credenciales reales de Google Cloud Console + cuenta Google.)*
+- [~] **1.4** Google Login. **DESCARTADO por decisión (2026-07-03).** Se implementó y verificó, pero se decidió usar **solo ASP.NET Identity** (email + contraseña). La implementación fue revertida (paquete `Authentication.Google`, `AddGoogle`, acciones `ExternalLogin`/`Callback`, botones en Login/Register). Si se retoma, la referencia está en el commit `1bc1337`.
 - [x] **1.5** Autorización por rol en `/Admin` + políticas. ✅
   - `Helpers/Policies.cs` (`AdminOnly`) + `AddAuthorization` con `RequireRole(Administrador)` en `Program.cs`.
   - Área Admin: `AdminBaseController` (`[Area("Admin")]` + `[Authorize(Policy = AdminOnly)]`) del que heredan todos los controladores del panel; `DashboardController` mínimo. Vistas del área (`_ViewImports`/`_ViewStart`/`Shared/_AdminLayout` con sidebar + `Dashboard/Index`).
@@ -101,7 +98,8 @@
   - `POST /cart/rehydrate` (`CartController`, `[IgnoreAntiforgeryToken]` porque es solo lectura sin datos privados) → `ICatalogService.RehydrateCartAsync`: resuelve precio efectivo del servidor (ignora cualquier precio del cliente), recorta cantidad al stock, marca no disponibles (inactivos/borrados/categoría inactiva), calcula total. `CartVm`/`CartLineVm`/`CartItemInput`.
   - Verificado en runtime: casos normal/ajuste-por-stock/sin-stock/inexistente, total correcto, resistencia a inyección de precio (DTO solo id+qty).
   - **Verificado en navegador real (Chrome headless vía CDP)**: agregar desde el detalle → badge sube, `/cart` renderiza por fetch, reconcilia (recorta al stock con aviso), cambio de cantidad recalcula total, quitar ítem. Todo OK.
-- [ ] *(Futuro/opcional)* Migración a `ICartService` + tabla `CartItems`. ⬜
+- [ ] *(Futuro/opcional)* Migración a 
+`ICartService` + tabla `CartItems`. ⬜
 
 ## Fase 6 — Checkout y pedidos
 - [x] **6.1** Checkout autenticado + transacción + descuento de stock + concurrencia (anti-sobreventa). ✅
@@ -159,4 +157,5 @@
 | 2026-07-03 | Fase 6.2/6.3 | "Mis pedidos" (usuario) + gestión admin de pedidos: máquina de estados, cambio de estado y reposición de stock al cancelar (solo si no estaba Entregado). Verificado en runtime. |
 | 2026-07-03 | Fase 7 | Auditoría por interceptor de SaveChanges (solo admin, tabla `AuditLogs`) + Dashboard admin con métricas. Verificado en runtime. |
 | 2026-07-03 | Fase 8 | Endurecimiento prod: rate limiting (login/registro), antiforgery global, forwarded headers, `appsettings.Production.json`, `PRODUCTION.md`. Smoke test completo verde. |
-| 2026-07-03 | Fase 1.4 + UX | Google Login (esquema externo condicional a credenciales) + display de precios en formato es-AR (`ToMoney()` + `toLocaleString` en JS). Verificado en runtime. |
+| 2026-07-03 | UX precios | Display de precios en formato es-AR (`ToMoney()` + `toLocaleString` en JS). Verificado en runtime. |
+| 2026-07-03 | Fase 1.4 (descartada) | Google Login implementado y verificado, luego **revertido por decisión**: se usa solo ASP.NET Identity. |
