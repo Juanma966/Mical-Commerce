@@ -54,12 +54,12 @@ else
                         <td class="text-end">
                             @if (p.SalePrice.HasValue)
                             {
-                                <span class="text-decoration-line-through text-muted me-1">@p.Price.ToString("N2")</span>
-                                <strong>@p.EffectivePrice.ToString("N2")</strong>
+                                <span class="text-decoration-line-through text-muted me-1">@p.Price.ToMoney()</span>
+                                <strong>@p.EffectivePrice.ToMoney()</strong>
                             }
                             else
                             {
-                                <span>@p.Price.ToString("N2")</span>
+                                <span>@p.Price.ToMoney()</span>
                             }
                         </td>
                         <td class="text-end">

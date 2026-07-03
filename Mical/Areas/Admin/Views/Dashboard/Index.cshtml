@@ -12,7 +12,7 @@
     <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100"><div class="card-body">
             <p class="text-muted small text-uppercase mb-1">Ingresos</p>
-            <p class="h4 mb-0">$@Model.Revenue.ToString("N2")</p>
+            <p class="h4 mb-0">@Model.Revenue.ToMoney()</p>
         </div></div>
     </div>
     <div class="col-6 col-lg-3">
@@ -119,7 +119,7 @@
                                         <td class="small">@o.CustomerEmail</td>
                                         <td class="small">@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                                         <td><span class="badge @badge.Css">@badge.Text</span></td>
-                                        <td class="text-end">$@o.Total.ToString("N2")</td>
+                                        <td class="text-end">@o.Total.ToMoney()</td>
                                     </tr>
                                 }
                             </tbody>
