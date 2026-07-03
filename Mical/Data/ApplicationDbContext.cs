@@ -19,6 +19,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +32,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         // Secuencia para el correlativo del SKU de productos (concurrencia segura).
         modelBuilder.HasSequence<long>("product_sku_seq").StartsAt(1).IncrementsBy(1);
+
+        // Secuencia para el número de pedido (ORD-2026-000123).
+        modelBuilder.HasSequence<long>("order_number_seq").StartsAt(1).IncrementsBy(1);
 
         // Extensión trigram para acelerar la búsqueda ILIKE por nombre (Fase 4.2).
         modelBuilder.HasPostgresExtension("pg_trgm");

@@ -101,7 +101,11 @@
 - [ ] *(Futuro/opcional)* Migración a `ICartService` + tabla `CartItems`. ⬜
 
 ## Fase 6 — Checkout y pedidos
-- [ ] **6.1** Checkout autenticado + transacción + descuento de stock + concurrencia (anti-sobreventa). ⬜
+- [x] **6.1** Checkout autenticado + transacción + descuento de stock + concurrencia (anti-sobreventa). ✅
+  - Entidades `Order`/`OrderItem` (snapshots de nombre y precio) + enum `OrderStatus` + configs (FK a AspNetUsers Restrict, OrderItems→Orders Cascade, →Products Restrict; OrderNumber único; índices). Secuencia `order_number_seq`. Token de concurrencia optimista `xmin` en Product (anti-sobreventa). Migración `AddOrders`.
+  - `IOrderService.CheckoutAsync`: parsea el carrito del cliente, re-valida en el servidor (existencia/activo/stock), calcula precios/total autoritativos, **descuenta stock dentro de una transacción** con reintentos ante `DbUpdateConcurrencyException`. `GetForUserAsync` (detalle solo del dueño).
+  - `CheckoutController` (`[Authorize]`, GET prellenado desde el perfil + POST) y `OrderController.Details` (dueño; `placed=true` → confirmación + limpia el carrito). Vistas `Checkout/Index` (form + resumen por JS desde LocalStorage, reconcilia y postea `CartJson`) y `Order/Details` (confirmación + badge de estado). Botón "Finalizar compra" del carrito → `/checkout`.
+  - Verificado en runtime: anónimo→login, compra OK (pedido `ORD-2026-000001` Pendiente, items con snapshot, stock descontado 50→48 / 3→0), stock insuficiente→rechazo con rollback (stock intacto), carrito vacío→rechazo, aislamiento por usuario (404 al ajeno). *(La carrera de concurrencia simultánea no se orquestó por HTTP; xmin+retry implementados.)*
 - [ ] **6.2** Historial y detalle de pedidos (usuario). ⬜
 - [ ] **6.3** Gestión de pedidos y cambio de estado (admin) + reposición de stock al cancelar (solo si NO estaba Entregado). ⬜
 
@@ -133,4 +137,5 @@
 | 2026-07-03 | Fase 2.2 | `CategoryService` (CRUD, unicidad case-insensitive, soft delete, audit log) + CRUD admin de categorías. Verificado en runtime. |
 | 2026-07-03 | Fase 3 | Productos: entidad+config+migración (3.1), `ISkuGenerator`+`IFileStorageService` (3.2), CRUD admin + FluentValidation (3.3). Fixes: cultura invariante (decimales) y OverridePropertyName. Verificado en runtime. |
 | 2026-07-03 | Fase 4 | Catálogo público: `ICatalogService`, `/shop` (filtro+paginación+búsqueda `pg_trgm`), `/product/{id}` (detalle + "Sin stock"). Header enlaza a la tienda. Verificado en runtime. |
-| 2026-07-03 | Fase 5 | Carrito: `cart.js` (LocalStorage) + `/cart` (UI por JS) + `POST /cart/rehydrate` (re-valida precio/stock server-side). Verificado endpoint + markup; JS cableado. |
+| 2026-07-03 | Fase 5 | Carrito: `cart.js` (LocalStorage) + `/cart` (UI por JS) + `POST /cart/rehydrate` (re-valida precio/stock server-side). Verificado endpoint + markup; JS cableado + browser real. |
+| 2026-07-03 | Fase 6.1 | Checkout: entidades Order/OrderItem + `OrderService.CheckoutAsync` (transacción, descuento de stock, xmin) + `/checkout` + confirmación. Verificado en runtime. |

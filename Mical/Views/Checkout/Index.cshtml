@@ -1,0 +1,128 @@
+@model CheckoutVm
+@{
+    ViewData["Title"] = "Finalizar compra";
+}
+
+<section class="py-5" style="margin-top:90px;">
+    <div class="container">
+        <h1 class="h3 border-bottom pb-3 mb-4">Finalizar compra</h1>
+
+        <div id="checkout-empty" class="alert alert-warning d-none">
+            Tu carrito está vacío. <a asp-controller="Shop" asp-action="Index">Volver a la tienda</a>.
+        </div>
+
+        <form asp-controller="Checkout" asp-action="Index" method="post" novalidate id="checkout-form">
+            <input type="hidden" asp-for="CartJson" id="CartJson" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-5">
+                <div class="col-lg-7">
+                    <h5 class="mb-3">Datos de contacto y envío</h5>
+                    <div class="mb-3">
+                        <label asp-for="ContactName" class="form-label"></label>
+                        <input asp-for="ContactName" class="form-control" autocomplete="name" />
+                        <span asp-validation-for="ContactName" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ContactPhone" class="form-label"></label>
+                        <input asp-for="ContactPhone" class="form-control" autocomplete="tel" />
+                        <span asp-validation-for="ContactPhone" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ShippingAddress" class="form-label"></label>
+                        <textarea asp-for="ShippingAddress" class="form-control" rows="2" autocomplete="street-address"></textarea>
+                        <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
+                    </div>
+                    <p class="text-muted small">El pago es por transferencia/contra entrega. El pedido queda <strong>Pendiente</strong> hasta que lo confirmemos.</p>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="mb-3">Tu pedido</h5>
+                            <div id="checkout-issues" class="alert alert-warning d-none py-2 small"></div>
+                            <ul class="list-unstyled mb-3" id="checkout-lines"></ul>
+                            <hr />
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Total</span>
+                                <strong id="checkout-total">$0.00</strong>
+                            </div>
+                            <button type="submit" id="checkout-submit" class="btn btn-dark w-100 py-2" disabled>Confirmar pedido</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            "use strict";
+            var $empty = document.getElementById("checkout-empty");
+            var $lines = document.getElementById("checkout-lines");
+            var $total = document.getElementById("checkout-total");
+            var $issues = document.getElementById("checkout-issues");
+            var $submit = document.getElementById("checkout-submit");
+            var $cartJson = document.getElementById("CartJson");
+            var $form = document.getElementById("checkout-form");
+
+            function money(n) { return "$" + Number(n).toFixed(2); }
+            function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; }
+
+            function syncCartJson() {
+                var items = window.Cart.items().map(function (i) { return { productId: i.id, quantity: i.qty }; });
+                $cartJson.value = JSON.stringify(items);
+            }
+
+            async function load() {
+                var items = window.Cart.items().map(function (i) { return { productId: i.id, quantity: i.qty }; });
+                if (items.length === 0) { return renderEmpty(); }
+
+                var res = await fetch("/cart/rehydrate", {
+                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(items)
+                });
+                render(await res.json());
+            }
+
+            function renderEmpty() {
+                $empty.classList.remove("d-none");
+                $form.classList.add("d-none");
+            }
+
+            function render(data) {
+                // Reconciliar LocalStorage con lo válido del servidor.
+                (data.lines || []).forEach(function (l) {
+                    if (!l.available) { window.Cart.remove(l.productId); }
+                    else if (l.quantity !== l.requestedQuantity) { window.Cart.setQty(l.productId, l.quantity); }
+                });
+
+                var visible = (data.lines || []).filter(function (l) { return l.available && l.quantity > 0; });
+                if (visible.length === 0) { return renderEmpty(); }
+
+                var msgs = [];
+                (data.lines || []).forEach(function (l) {
+                    if (!l.available) { msgs.push("Se quitó “" + l.name + "”: ya no está disponible."); }
+                    else if (l.quantity === 0) { msgs.push("“" + l.name + "” quedó sin stock."); }
+                    else if (l.quantity < l.requestedQuantity) { msgs.push("Ajustamos “" + l.name + "” a " + l.quantity + "."); }
+                });
+                if (msgs.length) { $issues.innerHTML = msgs.map(esc).join("<br>"); $issues.classList.remove("d-none"); }
+
+                $lines.innerHTML = visible.map(function (l) {
+                    return '<li class="d-flex justify-content-between mb-2">' +
+                        '<span>' + esc(l.name) + ' <span class="text-muted">× ' + l.quantity + '</span></span>' +
+                        '<span>' + money(l.lineTotal) + '</span></li>';
+                }).join("");
+                $total.textContent = money(data.total);
+
+                syncCartJson();
+                $submit.disabled = false;
+            }
+
+            $form.addEventListener("submit", syncCartJson);
+            document.addEventListener("DOMContentLoaded", load);
+        })();
+    </script>
+}

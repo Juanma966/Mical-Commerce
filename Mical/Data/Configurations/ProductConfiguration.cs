@@ -63,6 +63,14 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         // Borrado lógico.
         builder.HasQueryFilter(p => !p.IsDeleted);
 
+        // Concurrencia optimista para el stock (anti-sobreventa en el checkout).
+        // Usa la columna de sistema xmin de PostgreSQL como token: no agrega columna
+        // propia ni genera DDL. La API está marcada obsoleta pero es la forma correcta
+        // para xmin en Npgsql; el equivalente manual haría que EF intente crear la columna.
+#pragma warning disable CS0618 // UseXminAsConcurrencyToken obsoleto
+        builder.UseXminAsConcurrencyToken();
+#pragma warning restore CS0618
+
         // Propiedades calculadas: no se persisten.
         builder.Ignore(p => p.EffectivePrice);
         builder.Ignore(p => p.IsOnSale);
