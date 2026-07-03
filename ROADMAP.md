@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 4 completada (Catálogo público: /shop con filtro+paginación+búsqueda pg_trgm, detalle con "Sin stock"). Falta 1.4 (Google Login), pospuesta.
+**Última actualización:** 2026-07-03 — Fase 5 completada (Carrito: cart.js LocalStorage + UI /cart + endpoint de re-validación). Falta 1.4 (Google Login), pospuesta.
 
 ---
 
@@ -90,8 +90,13 @@
   - Verificado en runtime: listado (14 visibles, ocultos excluidos), paginación (2 págs), filtro por categoría, búsqueda trigram, detalle con oferta/sin-stock, 404 en ocultos/inexistentes.
 
 ## Fase 5 — Carrito (solo cliente)
-- [ ] **5.1** `cart.js` (LocalStorage) + UI de carrito. ⬜
-- [ ] **5.2** Endpoint server-side de re-hidratación/validación de precio y stock. ⬜
+- [x] **5.1** `cart.js` (LocalStorage) + UI de carrito. ✅
+  - `wwwroot/js/cart.js`: API `window.Cart` (add/setQty/remove/clear/count/items) sobre LocalStorage (`mical_cart`, solo `{id,qty}`), badge `.js-cart-count` en el header, botón delegado `.js-add-to-cart` (con `data-product-id`/`data-qty-target`). Incluido en `_Layout`.
+  - Detalle de producto: botón "Agregar al carrito" habilitado con selector de cantidad (deshabilitado si sin stock). Ícono del header enlaza a `/cart` con badge.
+  - `Views/Cart/Index` + `CartController.Index`: la página se rellena por JS (fetch a `/cart/rehydrate`), muestra líneas con stepper de cantidad, quita ítems, avisa ajustes/no-disponibles, total, y botón de checkout deshabilitado (Fase 6).
+- [x] **5.2** Endpoint server-side de re-hidratación/validación de precio y stock. ✅
+  - `POST /cart/rehydrate` (`CartController`, `[IgnoreAntiforgeryToken]` porque es solo lectura sin datos privados) → `ICatalogService.RehydrateCartAsync`: resuelve precio efectivo del servidor (ignora cualquier precio del cliente), recorta cantidad al stock, marca no disponibles (inactivos/borrados/categoría inactiva), calcula total. `CartVm`/`CartLineVm`/`CartItemInput`.
+  - Verificado en runtime: casos normal/ajuste-por-stock/sin-stock/inexistente, total correcto, resistencia a inyección de precio (DTO solo id+qty). UI JS cableada y revisada (no manejada en browser esta sesión).
 - [ ] *(Futuro/opcional)* Migración a `ICartService` + tabla `CartItems`. ⬜
 
 ## Fase 6 — Checkout y pedidos
@@ -127,3 +132,4 @@
 | 2026-07-03 | Fase 2.2 | `CategoryService` (CRUD, unicidad case-insensitive, soft delete, audit log) + CRUD admin de categorías. Verificado en runtime. |
 | 2026-07-03 | Fase 3 | Productos: entidad+config+migración (3.1), `ISkuGenerator`+`IFileStorageService` (3.2), CRUD admin + FluentValidation (3.3). Fixes: cultura invariante (decimales) y OverridePropertyName. Verificado en runtime. |
 | 2026-07-03 | Fase 4 | Catálogo público: `ICatalogService`, `/shop` (filtro+paginación+búsqueda `pg_trgm`), `/product/{id}` (detalle + "Sin stock"). Header enlaza a la tienda. Verificado en runtime. |
+| 2026-07-03 | Fase 5 | Carrito: `cart.js` (LocalStorage) + `/cart` (UI por JS) + `POST /cart/rehydrate` (re-valida precio/stock server-side). Verificado endpoint + markup; JS cableado. |

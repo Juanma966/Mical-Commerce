@@ -1,0 +1,169 @@
+@{
+    ViewData["Title"] = "Mi carrito";
+}
+
+<section class="py-5" style="margin-top:90px;">
+    <div class="container">
+        <h1 class="h3 border-bottom pb-3 mb-4">Mi carrito</h1>
+
+        <div id="cart-issues" class="alert alert-warning d-none" role="alert"></div>
+
+        <div id="cart-empty" class="text-center text-muted py-5 d-none">
+            <p class="mb-3">Tu carrito está vacío.</p>
+            <a asp-controller="Shop" asp-action="Index" class="btn btn-dark px-4">Ir a la tienda</a>
+        </div>
+
+        <div id="cart-content" class="row d-none">
+            <div class="col-lg-8">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th colspan="2">Producto</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-center" style="width:130px;">Cantidad</th>
+                                <th class="text-end">Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-lines"></tbody>
+                    </table>
+                </div>
+                <a asp-controller="Shop" asp-action="Index" class="text-decoration-none">← Seguir comprando</a>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="mb-3">Resumen</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total</span>
+                            <strong id="cart-total">$0.00</strong>
+                        </div>
+                        <hr />
+                        <button type="button" class="btn btn-dark w-100 py-2" disabled title="Se habilita en la Fase 6">
+                            Finalizar compra
+                        </button>
+                        <p class="text-muted small mt-2 mb-0">El checkout se habilita en la próxima fase.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            "use strict";
+            var $issues = document.getElementById("cart-issues");
+            var $empty = document.getElementById("cart-empty");
+            var $content = document.getElementById("cart-content");
+            var $lines = document.getElementById("cart-lines");
+            var $total = document.getElementById("cart-total");
+
+            function money(n) { return "$" + Number(n).toFixed(2); }
+
+            function esc(s) {
+                var d = document.createElement("div");
+                d.textContent = s == null ? "" : s;
+                return d.innerHTML;
+            }
+
+            async function load() {
+                var items = window.Cart.items().map(function (i) {
+                    return { productId: i.id, quantity: i.qty };
+                });
+
+                if (items.length === 0) { return render({ lines: [], total: 0, hasIssues: false }); }
+
+                try {
+                    var res = await fetch("/cart/rehydrate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(items)
+                    });
+                    render(await res.json());
+                } catch (e) {
+                    $issues.textContent = "No pudimos cargar tu carrito. Probá de nuevo.";
+                    $issues.classList.remove("d-none");
+                }
+            }
+
+            function reconcile(data) {
+                // Ajusta LocalStorage a lo que el servidor considera válido.
+                (data.lines || []).forEach(function (l) {
+                    if (!l.available) { window.Cart.remove(l.productId); }
+                    else if (l.quantity !== l.requestedQuantity) { window.Cart.setQty(l.productId, l.quantity); }
+                });
+            }
+
+            function render(data) {
+                reconcile(data);
+
+                var lines = data.lines || [];
+                var messages = [];
+                var visible = lines.filter(function (l) { return l.available && l.quantity > 0; });
+
+                if (lines.length === 0 || visible.length === 0) {
+                    $content.classList.add("d-none");
+                    $empty.classList.remove("d-none");
+                }
+
+                lines.forEach(function (l) {
+                    if (!l.available) { messages.push("Se quitó “" + l.name + "”: ya no está disponible."); }
+                    else if (l.quantity === 0) { messages.push("“" + l.name + "” quedó sin stock y se quitó."); }
+                    else if (l.quantity < l.requestedQuantity) { messages.push("Ajustamos “" + l.name + "” a " + l.quantity + " (stock disponible)."); }
+                });
+
+                if (messages.length) {
+                    $issues.innerHTML = messages.map(esc).join("<br>");
+                    $issues.classList.remove("d-none");
+                } else {
+                    $issues.classList.add("d-none");
+                }
+
+                if (visible.length === 0) { return; }
+
+                $empty.classList.add("d-none");
+                $content.classList.remove("d-none");
+
+                $lines.innerHTML = visible.map(function (l) {
+                    var img = l.imagePath
+                        ? '<img src="/' + esc(l.imagePath) + '" alt="" width="56" height="56" style="object-fit:cover;border-radius:6px;">'
+                        : '<span class="d-inline-block bg-light border rounded" style="width:56px;height:56px;"></span>';
+                    return '' +
+                        '<tr>' +
+                        '<td style="width:72px;">' + img + '</td>' +
+                        '<td>' + esc(l.name) + '</td>' +
+                        '<td class="text-end">' + money(l.unitPrice) + '</td>' +
+                        '<td class="text-center">' +
+                            '<input type="number" min="1" max="' + l.availableStock + '" value="' + l.quantity + '" ' +
+                            'class="form-control form-control-sm text-center js-qty" data-id="' + l.productId + '" style="width:80px;margin:auto;">' +
+                        '</td>' +
+                        '<td class="text-end">' + money(l.lineTotal) + '</td>' +
+                        '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger js-remove" data-id="' + l.productId + '">✕</button></td>' +
+                        '</tr>';
+                }).join("");
+
+                $total.textContent = money(data.total);
+            }
+
+            $lines.addEventListener("change", function (e) {
+                var input = e.target.closest(".js-qty");
+                if (!input) { return; }
+                window.Cart.setQty(input.getAttribute("data-id"), input.value);
+                load();
+            });
+
+            $lines.addEventListener("click", function (e) {
+                var btn = e.target.closest(".js-remove");
+                if (!btn) { return; }
+                window.Cart.remove(btn.getAttribute("data-id"));
+                load();
+            });
+
+            document.addEventListener("DOMContentLoaded", load);
+        })();
+    </script>
+}

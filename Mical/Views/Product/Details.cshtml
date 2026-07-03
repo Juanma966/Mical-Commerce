@@ -48,11 +48,13 @@
                 else
                 {
                     <p class="text-success small mb-3">Disponible · @Model.Stock en stock</p>
-                    @* El carrito (LocalStorage) se implementa en la Fase 5. *@
-                    <button type="button" class="btn btn-dark btn-lg px-4 js-add-to-cart"
-                            data-product-id="@Model.Id" disabled title="Disponible en la Fase 5">
-                        Agregar al carrito
-                    </button>
+                    <div class="d-flex align-items-center gap-2" style="max-width:340px;">
+                        <input id="qty" type="number" value="1" min="1" max="@Model.Stock" class="form-control" style="width:90px;" />
+                        <button type="button" class="btn btn-dark btn-lg px-4 js-add-to-cart flex-grow-1"
+                                data-product-id="@Model.Id" data-qty-target="#qty" data-label="Agregar al carrito">
+                            Agregar al carrito
+                        </button>
+                    </div>
                 }
 
                 @if (!string.IsNullOrWhiteSpace(Model.Description))

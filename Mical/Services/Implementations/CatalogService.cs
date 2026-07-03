@@ -71,6 +71,80 @@ public class CatalogService : ICatalogService
         };
     }
 
+    public async Task<CartVm> RehydrateCartAsync(IEnumerable<CartItemInput> items)
+    {
+        // Une duplicados y descarta entradas inválidas. La cantidad pedida se limita
+        // a un máximo razonable por línea para evitar abusos.
+        var requested = items
+            .Where(i => i.ProductId > 0 && i.Quantity > 0)
+            .GroupBy(i => i.ProductId)
+            .ToDictionary(g => g.Key, g => Math.Min(g.Sum(x => x.Quantity), 999));
+
+        var result = new CartVm();
+        if (requested.Count == 0)
+            return result;
+
+        var ids = requested.Keys.ToList();
+
+        // Solo productos visibles (activos y de categorías activas).
+        var products = await _db.Products
+            .Where(p => ids.Contains(p.Id) && p.IsActive && p.Category!.IsActive)
+            .Select(p => new
+            {
+                p.Id,
+                p.Name,
+                p.ImagePath,
+                UnitPrice = p.SalePrice ?? p.Price,
+                p.Stock
+            })
+            .ToListAsync();
+
+        foreach (var id in ids)
+        {
+            var requestedQty = requested[id];
+            var prod = products.FirstOrDefault(p => p.Id == id);
+
+            if (prod is null)
+            {
+                // Ya no está disponible (borrado, inactivo o categoría inactiva).
+                result.Lines.Add(new CartLineVm
+                {
+                    ProductId = id,
+                    Name = "Producto no disponible",
+                    RequestedQuantity = requestedQty,
+                    Quantity = 0,
+                    Available = false
+                });
+                result.HasIssues = true;
+                continue;
+            }
+
+            var effectiveQty = Math.Min(requestedQty, prod.Stock);
+            var lineTotal = prod.UnitPrice * effectiveQty;
+
+            result.Lines.Add(new CartLineVm
+            {
+                ProductId = prod.Id,
+                Name = prod.Name,
+                ImagePath = prod.ImagePath,
+                UnitPrice = prod.UnitPrice,
+                Quantity = effectiveQty,
+                RequestedQuantity = requestedQty,
+                AvailableStock = prod.Stock,
+                LineTotal = lineTotal,
+                Available = true
+            });
+
+            result.Total += lineTotal;
+            result.ItemCount += effectiveQty;
+
+            if (effectiveQty < requestedQty)
+                result.HasIssues = true;
+        }
+
+        return result;
+    }
+
     public async Task<ProductDetailVm?> GetProductDetailAsync(int id)
     {
         return await _db.Products
