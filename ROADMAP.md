@@ -96,7 +96,8 @@
   - `Views/Cart/Index` + `CartController.Index`: la página se rellena por JS (fetch a `/cart/rehydrate`), muestra líneas con stepper de cantidad, quita ítems, avisa ajustes/no-disponibles, total, y botón de checkout deshabilitado (Fase 6).
 - [x] **5.2** Endpoint server-side de re-hidratación/validación de precio y stock. ✅
   - `POST /cart/rehydrate` (`CartController`, `[IgnoreAntiforgeryToken]` porque es solo lectura sin datos privados) → `ICatalogService.RehydrateCartAsync`: resuelve precio efectivo del servidor (ignora cualquier precio del cliente), recorta cantidad al stock, marca no disponibles (inactivos/borrados/categoría inactiva), calcula total. `CartVm`/`CartLineVm`/`CartItemInput`.
-  - Verificado en runtime: casos normal/ajuste-por-stock/sin-stock/inexistente, total correcto, resistencia a inyección de precio (DTO solo id+qty). UI JS cableada y revisada (no manejada en browser esta sesión).
+  - Verificado en runtime: casos normal/ajuste-por-stock/sin-stock/inexistente, total correcto, resistencia a inyección de precio (DTO solo id+qty).
+  - **Verificado en navegador real (Chrome headless vía CDP)**: agregar desde el detalle → badge sube, `/cart` renderiza por fetch, reconcilia (recorta al stock con aviso), cambio de cantidad recalcula total, quitar ítem. Todo OK.
 - [ ] *(Futuro/opcional)* Migración a `ICartService` + tabla `CartItems`. ⬜
 
 ## Fase 6 — Checkout y pedidos
