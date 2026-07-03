@@ -24,6 +24,8 @@ try
 
     // Add services to the container.
     builder.Services.AddControllersWithViews();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddApplicationServices();
 
     // Base de datos: PostgreSQL vía EF Core (Npgsql).
     // La cadena de conexión se resuelve desde configuración/entorno (nunca hardcodeada).

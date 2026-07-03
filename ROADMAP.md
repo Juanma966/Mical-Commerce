@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 1.5 completada (autorización por rol en `/Admin` + política `AdminOnly`). Falta 1.4 (Google Login), pospuesta.
+**Última actualización:** 2026-07-03 — Fase 2 completada (Categorías: entidad + CRUD admin + soft delete + auditoría por log). Falta 1.4 (Google Login), pospuesta.
 
 ---
 
@@ -62,7 +62,13 @@
   - `Entities/Category.cs` (Name único, Description, ImagePath, IsActive, timestamps, soft delete).
   - `Data/Configurations/CategoryConfiguration.cs`: max lengths, defaults, índice único de `Name` filtrado por `IsDeleted=false`, query filter global de soft delete. `DbSet<Category>` en el contexto.
   - Migración `AddCategory` aplicada. Verificado en Postgres: tabla + índice único parcial OK.
-- [ ] **2.2** Service + validación + Area Admin CRUD + auditoría. ⬜
+- [x] **2.2** Service + validación + Area Admin CRUD + auditoría. ✅
+  - `Models/OperationResult.cs` (resultado de negocio) + VMs admin (`CategoryFormVm`, `AdminCategoryListItemVm`).
+  - `Services/Interfaces/ICategoryService` + `Implementations/CategoryService`: CRUD, mapeo VM↔entidad, chequeo de unicidad **case-insensitive**, soft delete, timestamps (IAuditable) y logging de auditoría `[AUDIT]` con el usuario actor (vía `IHttpContextAccessor`). Registrado en `Extensions/ServiceCollectionExtensions.AddApplicationServices` + `AddHttpContextAccessor`.
+  - `Areas/Admin/Controllers/CategoriesController` (hereda `AdminBaseController`) + vistas Index/Create/Edit/Delete (antiforgery, validación cliente, PRG con TempData). Sidebar admin habilita "Categorías".
+  - Validación: DataAnnotations (cliente + básico) + unicidad en el service; el índice único parcial de PostgreSQL es la garantía final. *(FluentValidation se difiere a la Fase 3 para reglas ricas de producto: SKU/stock/imágenes.)*
+  - Auditoría: por ahora vía log `[AUDIT]` (Serilog). La tabla `AuditLogs` + interceptor son la Fase 7.1.
+  - Verificado en runtime como admin: crear/listar/editar/soft-delete OK, duplicado (distinto case) rechazado, query filter oculta la borrada, logs `[AUDIT]` con el actor.
 
 ## Fase 3 — Productos
 - [ ] **3.1** Entidad + relación con categoría + soft delete (global filter) + migración. ⬜
@@ -108,3 +114,5 @@
 | 2026-07-03 | Fase 1.2 | `AccountController` + ViewModels + vistas: registro/login/logout/perfil/cambio de contraseña. Flujo completo verificado en runtime con curl. |
 | 2026-07-03 | Fase 1.3 | Roles + `DbInitializer` (seed idempotente de roles y admin). Registro asigna rol Usuario. Verificado en runtime + Postgres. |
 | 2026-07-03 | Fase 1.5 | Área Admin protegida: política `AdminOnly`, `AdminBaseController`, `DashboardController` + layout. Ruta de áreas. Verificado (anónimo/usuario/admin). 1.4 pospuesta. |
+| 2026-07-03 | Fase 2.1 | Entidad `Category` + `CategoryConfiguration` (índice único parcial + query filter) + migración `AddCategory`. Verificado en Postgres. |
+| 2026-07-03 | Fase 2.2 | `CategoryService` (CRUD, unicidad case-insensitive, soft delete, audit log) + CRUD admin de categorías. Verificado en runtime. |
