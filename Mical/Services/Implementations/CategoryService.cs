@@ -10,20 +10,11 @@ namespace Mical.Services.Implementations;
 public class CategoryService : ICategoryService
 {
     private readonly ApplicationDbContext _db;
-    private readonly ILogger<CategoryService> _logger;
-    private readonly IHttpContextAccessor _httpContext;
 
-    public CategoryService(
-        ApplicationDbContext db,
-        ILogger<CategoryService> logger,
-        IHttpContextAccessor httpContext)
+    public CategoryService(ApplicationDbContext db)
     {
         _db = db;
-        _logger = logger;
-        _httpContext = httpContext;
     }
-
-    private string CurrentUser => _httpContext.HttpContext?.User?.Identity?.Name ?? "sistema";
 
     public async Task<IReadOnlyList<AdminCategoryListItemVm>> GetAllForAdminAsync()
     {
@@ -87,9 +78,6 @@ public class CategoryService : ICategoryService
 
         _db.Categories.Add(category);
         await _db.SaveChangesAsync();
-
-        _logger.LogInformation("[AUDIT] {User} creó la categoría '{Name}' (Id {Id}).",
-            CurrentUser, category.Name, category.Id);
         return OperationResult.Success();
     }
 
@@ -109,9 +97,6 @@ public class CategoryService : ICategoryService
         category.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
-
-        _logger.LogInformation("[AUDIT] {User} actualizó la categoría '{Name}' (Id {Id}).",
-            CurrentUser, category.Name, category.Id);
         return OperationResult.Success();
     }
 
@@ -125,9 +110,6 @@ public class CategoryService : ICategoryService
         category.IsDeleted = true;
         category.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
-
-        _logger.LogInformation("[AUDIT] {User} eliminó (soft delete) la categoría '{Name}' (Id {Id}).",
-            CurrentUser, category.Name, category.Id);
         return OperationResult.Success();
     }
 

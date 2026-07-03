@@ -13,24 +13,16 @@ public class ProductService : IProductService
     private readonly ApplicationDbContext _db;
     private readonly ISkuGenerator _sku;
     private readonly IFileStorageService _files;
-    private readonly ILogger<ProductService> _logger;
-    private readonly IHttpContextAccessor _httpContext;
 
     public ProductService(
         ApplicationDbContext db,
         ISkuGenerator sku,
-        IFileStorageService files,
-        ILogger<ProductService> logger,
-        IHttpContextAccessor httpContext)
+        IFileStorageService files)
     {
         _db = db;
         _sku = sku;
         _files = files;
-        _logger = logger;
-        _httpContext = httpContext;
     }
-
-    private string CurrentUser => _httpContext.HttpContext?.User?.Identity?.Name ?? "sistema";
 
     public async Task<IReadOnlyList<AdminProductListItemVm>> GetAllForAdminAsync()
     {
@@ -127,9 +119,6 @@ public class ProductService : IProductService
 
         _db.Products.Add(product);
         await _db.SaveChangesAsync();
-
-        _logger.LogInformation("[AUDIT] {User} creó el producto '{Name}' (SKU {Sku}, Id {Id}).",
-            CurrentUser, product.Name, product.Sku, product.Id);
         return OperationResult.Success();
     }
 
@@ -166,9 +155,6 @@ public class ProductService : IProductService
         product.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
-
-        _logger.LogInformation("[AUDIT] {User} actualizó el producto '{Name}' (SKU {Sku}, Id {Id}).",
-            CurrentUser, product.Name, product.Sku, product.Id);
         return OperationResult.Success();
     }
 
@@ -182,9 +168,6 @@ public class ProductService : IProductService
         product.IsDeleted = true;
         product.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
-
-        _logger.LogInformation("[AUDIT] {User} eliminó (soft delete) el producto '{Name}' (SKU {Sku}, Id {Id}).",
-            CurrentUser, product.Name, product.Sku, product.Id);
         return OperationResult.Success();
     }
 

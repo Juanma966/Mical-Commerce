@@ -219,7 +219,7 @@ public class OrderService : IOrderService
         return vm;
     }
 
-    public async Task<OperationResult> UpdateStatusAsync(int orderId, OrderStatus newStatus, string adminUserName)
+    public async Task<OperationResult> UpdateStatusAsync(int orderId, OrderStatus newStatus)
     {
         var order = await _db.Orders
             .Include(o => o.Items)
@@ -257,8 +257,6 @@ public class OrderService : IOrderService
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
 
-        _logger.LogInformation("[AUDIT] {User} cambió el pedido {OrderNumber} de {From} a {To}.",
-            adminUserName, order.OrderNumber, current, newStatus);
         return OperationResult.Success();
     }
 

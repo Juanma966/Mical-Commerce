@@ -1,3 +1,4 @@
+@model DashboardVm
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -6,11 +7,126 @@
     <h1 class="h3 mb-0">Panel de administración</h1>
 </div>
 
-<div class="alert alert-success" role="alert">
-    Acceso autorizado. Estás dentro del panel con el rol <strong>Administrador</strong>.
+<!-- Tarjetas resumen -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small text-uppercase mb-1">Ingresos</p>
+            <p class="h4 mb-0">$@Model.Revenue.ToString("N2")</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small text-uppercase mb-1">Pedidos</p>
+            <p class="h4 mb-0">@Model.TotalOrders</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small text-uppercase mb-1">Productos</p>
+            <p class="h4 mb-0">@Model.TotalProducts</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small text-uppercase mb-1">Categorías</p>
+            <p class="h4 mb-0">@Model.TotalCategories</p>
+        </div></div>
+    </div>
 </div>
 
-<p class="text-muted">
-    Desde acá vas a gestionar categorías, productos, pedidos y usuarios a medida que
-    se completen las próximas fases. Las métricas del dashboard llegan en la Fase 7.2.
-</p>
+<div class="row g-4">
+    <!-- Pedidos por estado -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-3">Pedidos por estado</h6>
+                <ul class="list-unstyled mb-0">
+                    @foreach (var s in Model.OrdersByStatus)
+                    {
+                        var badge = s.Status.Badge();
+                        <li class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge @badge.Css">@badge.Text</span>
+                            <strong>@s.Count</strong>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock bajo -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-3">Productos con stock bajo</h6>
+                @if (Model.LowStock.Count == 0)
+                {
+                    <p class="text-muted small mb-0">No hay productos por debajo del stock mínimo.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead><tr><th>SKU</th><th>Producto</th><th class="text-end">Stock</th><th class="text-end">Mínimo</th></tr></thead>
+                            <tbody>
+                                @foreach (var p in Model.LowStock)
+                                {
+                                    <tr>
+                                        <td class="small text-muted">@p.Sku</td>
+                                        <td><a asp-controller="Products" asp-action="Edit" asp-route-id="@p.Id" class="text-decoration-none">@p.Name</a></td>
+                                        <td class="text-end">
+                                            @if (p.Stock <= 0)
+                                            {
+                                                <span class="badge bg-danger">@p.Stock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">@p.Stock</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">@p.MinStock</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos pedidos -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-3">Últimos pedidos</h6>
+                @if (Model.RecentOrders.Count == 0)
+                {
+                    <p class="text-muted small mb-0">Todavía no hay pedidos.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead><tr><th>Pedido</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th class="text-end">Total</th></tr></thead>
+                            <tbody>
+                                @foreach (var o in Model.RecentOrders)
+                                {
+                                    var badge = o.Status.Badge();
+                                    <tr>
+                                        <td><a asp-controller="Orders" asp-action="Details" asp-route-id="@o.Id" class="text-decoration-none fw-semibold">@o.OrderNumber</a></td>
+                                        <td class="small">@o.CustomerEmail</td>
+                                        <td class="small">@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td><span class="badge @badge.Css">@badge.Text</span></td>
+                                        <td class="text-end">$@o.Total.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

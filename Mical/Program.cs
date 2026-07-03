@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Mical.Data;
+using Mical.Data.Interceptors;
 using Mical.Data.Seed;
 using Mical.Entities;
 using Mical.Extensions;
@@ -37,8 +38,12 @@ try
             "No se encontró la cadena de conexión 'DefaultConnection'. " +
             "Configurala con user-secrets (dev) o variables de entorno (prod).");
 
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
+    // Interceptor de auditoría (registra acciones de admin en AuditLogs).
+    builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+
+    builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        options.UseNpgsql(connectionString)
+               .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
 
     // ASP.NET Identity con autenticación por cookies (sin JWT).
     // Los flujos de registro/login se implementan en la Fase 1.2 y los roles en 1.3;

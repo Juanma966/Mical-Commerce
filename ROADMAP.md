@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 6 completada (Checkout + pedidos usuario + gestión admin con máquina de estados y reposición de stock). Falta 1.4 (Google Login), pospuesta.
+**Última actualización:** 2026-07-03 — Fase 7 completada (Auditoría por interceptor solo-admin + Dashboard con métricas). Falta 1.4 (Google Login), pospuesta.
 
 ---
 
@@ -114,8 +114,13 @@
   - Verificado en runtime: historial de usuario, listado admin con cliente, transición inválida rechazada (estado intacto), cadena Pendiente→Pagado→Preparando→Enviado→Entregado, cancelar desde Pagado repone stock, y **cancelar desde Entregado NO repone stock**.
 
 ## Fase 7 — Auditoría y dashboard
-- [ ] **7.1** Interceptor de auditoría conectado, **solo acciones de admin** (expandir solo si hace falta). ⬜
-- [ ] **7.2** Dashboard admin con métricas (pedidos por estado, productos bajo stock mínimo, ventas recientes). ⬜
+- [x] **7.1** Interceptor de auditoría conectado, **solo acciones de admin** (expandir solo si hace falta). ✅
+  - Entidad `AuditLog` + config + migración `AddAuditLog`. `Data/Interceptors/AuditSaveChangesInterceptor` (whitelist Product/Category/Order; gate por rol Administrador vía `IHttpContextAccessor`; patrón dos fases Saving/Saved con estado por contexto; Details legible "Prop: viejo → nuevo", soft-delete detectado como `Deleted`). Registrado en `Program.cs` (interceptor scoped + `AddInterceptors`).
+  - Se quitaron los logs `[AUDIT]` manuales de los services (los centraliza el interceptor); `CategoryService`/`ProductService` quedaron sin `ILogger`/`IHttpContextAccessor`.
+  - Verificado: admin crear/editar/soft-delete de categoría y producto y cambio de estado → auditados con detalle; **checkout de un cliente NO se audita** (no es admin).
+- [x] **7.2** Dashboard admin con métricas (pedidos por estado, productos bajo stock mínimo, ventas recientes). ✅
+  - `IDashboardService`/`DashboardService` (totales, ingresos de pedidos no cancelados, conteo por estado, stock bajo `Stock<=MinStock`, últimos 5 pedidos). `DashboardController` + vista con tarjetas y tablas.
+  - Verificado en runtime: métricas correctas (ingresos por snapshot del pedido, no por precio actual).
 
 ## Fase 8 — Endurecimiento para producción
 - [ ] **8.1** `appsettings.Production.json`, secretos por entorno, HTTPS/HSTS. ⬜
@@ -144,3 +149,4 @@
 | 2026-07-03 | Fase 5 | Carrito: `cart.js` (LocalStorage) + `/cart` (UI por JS) + `POST /cart/rehydrate` (re-valida precio/stock server-side). Verificado endpoint + markup; JS cableado + browser real. |
 | 2026-07-03 | Fase 6.1 | Checkout: entidades Order/OrderItem + `OrderService.CheckoutAsync` (transacción, descuento de stock, xmin) + `/checkout` + confirmación. Verificado en runtime. |
 | 2026-07-03 | Fase 6.2/6.3 | "Mis pedidos" (usuario) + gestión admin de pedidos: máquina de estados, cambio de estado y reposición de stock al cancelar (solo si no estaba Entregado). Verificado en runtime. |
+| 2026-07-03 | Fase 7 | Auditoría por interceptor de SaveChanges (solo admin, tabla `AuditLogs`) + Dashboard admin con métricas. Verificado en runtime. |

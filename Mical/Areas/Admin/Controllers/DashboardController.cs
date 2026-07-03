@@ -1,12 +1,21 @@
+using Mical.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mical.Areas.Admin.Controllers;
 
-/// <summary>
-/// Página de inicio del panel de administración. Por ahora solo confirma el
-/// acceso autorizado; las métricas del dashboard llegan en la Fase 7.2.
-/// </summary>
+/// <summary>Página de inicio del panel de administración con métricas.</summary>
 public class DashboardController : AdminBaseController
 {
-    public IActionResult Index() => View();
+    private readonly IDashboardService _dashboard;
+
+    public DashboardController(IDashboardService dashboard)
+    {
+        _dashboard = dashboard;
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        var vm = await _dashboard.GetAsync();
+        return View(vm);
+    }
 }

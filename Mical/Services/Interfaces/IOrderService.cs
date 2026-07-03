@@ -29,5 +29,5 @@ public interface IOrderService
     /// Cambia el estado según la máquina de estados. Al cancelar, repone stock
     /// solo si el estado previo NO era Entregado. Registra auditoría.
     /// </summary>
-    Task<OperationResult> UpdateStatusAsync(int orderId, OrderStatus newStatus, string adminUserName);
+    Task<OperationResult> UpdateStatusAsync(int orderId, OrderStatus newStatus);
 }

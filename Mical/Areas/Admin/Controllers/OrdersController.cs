@@ -36,7 +36,7 @@ public class OrdersController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeStatus(int id, OrderStatus newStatus)
     {
-        var result = await _orders.UpdateStatusAsync(id, newStatus, User.Identity?.Name ?? "admin");
+        var result = await _orders.UpdateStatusAsync(id, newStatus);
         TempData["StatusMessage"] = result.Succeeded
             ? $"Pedido actualizado a {newStatus}."
             : result.Error;

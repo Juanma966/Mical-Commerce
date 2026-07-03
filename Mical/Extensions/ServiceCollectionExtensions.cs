@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ISkuGenerator, SkuGenerator>();
         services.AddScoped<IFileStorageService, FileStorageService>();
         return services;
