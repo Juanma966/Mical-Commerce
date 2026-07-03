@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-02 — Fase 0.4 completada. **Fase 0 cerrada.**
+**Última actualización:** 2026-07-03 — Fase 1.2 completada (registro / login / logout / perfil / cambio de contraseña, validado en runtime).
 
 ---
 
@@ -33,8 +33,17 @@
   - Verificado en runtime: home 200 con headers, 404 → página amigable, logs en consola y archivo.
 
 ## Fase 1 — Identidad y seguridad base
-- [ ] **1.1** ASP.NET Identity con cookies + entidad `ApplicationUser`. ⬜
-- [ ] **1.2** Registro / Login / Logout / perfil / cambio de contraseña. ⬜
+- [x] **1.1** ASP.NET Identity con cookies + entidad `ApplicationUser`. ✅
+  - Paquete `Microsoft.AspNetCore.Identity.EntityFrameworkCore` 8.0.10.
+  - `Entities/ApplicationUser.cs : IdentityUser` (+ `FullName`, `CreatedAt`).
+  - `ApplicationDbContext` ahora hereda de `IdentityDbContext<ApplicationUser>`.
+  - `Program.cs`: `AddIdentity` (password: 8+ con dígito/mayús/minús; lockout 5 intentos/15 min; email único) + `ConfigureApplicationCookie` (HttpOnly, Secure=Always, SameSite=Lax, sliding 14d, rutas `/account/login|logout|denied`) + `UseAuthentication()` antes de `UseAuthorization()`.
+  - Migración `AddIdentity` creada y aplicada. Verificado: 7 tablas `AspNet*` + columnas `FullName`/`CreatedAt` en `AspNetUsers`. Build OK.
+- [x] **1.2** Registro / Login / Logout / perfil / cambio de contraseña. ✅
+  - ViewModels en `ViewModels/`: `RegisterVm`, `LoginVm`, `ProfileVm`, `ChangePasswordVm` (DataAnnotations en español).
+  - `AccountController`: Register, Login, Logout (POST+antiforgery), Profile (ver/editar `FullName`+`PhoneNumber`; email solo lectura), ChangePassword, Denied. `RedirectToLocal` con `Url.IsLocalUrl` (anti open-redirect); login con `lockoutOnFailure:true` y mensaje genérico; errores de Identity traducidos.
+  - Vistas Bootstrap en `Views/Account/` + validación cliente (`_ValidationScriptsPartial`). Header con ícono usuario → Perfil/Login + botón Salir según sesión.
+  - Verificado en runtime (curl, https): registro→auto-login→home, `/Profile` protegido (302 a login si anónimo), login ok/fallido, registro duplicado, logout, cambio de contraseña + re-login con clave nueva. Usuario de prueba borrado.
 - [ ] **1.3** Roles (Administrador, Usuario) + `DbInitializer` (seed de roles y admin inicial). ⬜
 - [ ] **1.4** Google Login. ⬜
 - [ ] **1.5** Autorización por rol en `/Admin` + políticas. ⬜
@@ -83,3 +92,5 @@
 | 2026-07-01 | Fase 0.2 | Frontend MiniStore integrado: layout + partials (`_IconSprite`, `_Header`, `_Footer`) + `Home/Index`. Verificado en runtime (HTTP 200). |
 | 2026-07-02 | Fase 0.3 | PostgreSQL 16 en Docker (`mical-postgres`) + EF Core/Npgsql + `ApplicationDbContext` + user-secrets. Verificado con `dotnet ef dbcontext info`. |
 | 2026-07-02 | Fase 0.4 | Serilog (consola+archivo) + request logging + página de error amigable + headers de seguridad. Verificado en runtime. **Fase 0 cerrada.** |
+| 2026-07-03 | Fase 1.1 | ASP.NET Identity (cookies) + `ApplicationUser` + `IdentityDbContext`. Migración `AddIdentity` aplicada; 7 tablas `AspNet*` verificadas en Postgres. |
+| 2026-07-03 | Fase 1.2 | `AccountController` + ViewModels + vistas: registro/login/logout/perfil/cambio de contraseña. Flujo completo verificado en runtime con curl. |
