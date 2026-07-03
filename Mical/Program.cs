@@ -1,4 +1,6 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Mical.Data;
 using Mical.Data.Seed;
@@ -26,6 +28,7 @@ try
     builder.Services.AddControllersWithViews();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddApplicationServices();
+    builder.Services.AddApplicationValidation();
 
     // Base de datos: PostgreSQL vía EF Core (Npgsql).
     // La cadena de conexión se resuelve desde configuración/entorno (nunca hardcodeada).
@@ -103,6 +106,16 @@ try
     app.UseHttpsRedirection();
     app.UseSecurityHeaders();
     app.UseStaticFiles();
+
+    // Cultura invariante: los <input type="number"> envían decimales con punto
+    // (formato invariante). Fijarla evita que el binding malinterprete "15000.50".
+    var invariant = new[] { CultureInfo.InvariantCulture };
+    app.UseRequestLocalization(new RequestLocalizationOptions
+    {
+        DefaultRequestCulture = new RequestCulture(CultureInfo.InvariantCulture),
+        SupportedCultures = invariant,
+        SupportedUICultures = invariant
+    });
 
     app.UseRouting();
 

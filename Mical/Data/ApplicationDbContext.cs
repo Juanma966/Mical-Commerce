@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,5 +27,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         // Carga automática de todas las configuraciones IEntityTypeConfiguration<T>
         // ubicadas en Data/Configurations.
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+        // Secuencia para el correlativo del SKU de productos (concurrencia segura).
+        modelBuilder.HasSequence<long>("product_sku_seq").StartsAt(1).IncrementsBy(1);
     }
 }

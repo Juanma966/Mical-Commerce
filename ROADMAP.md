@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 2 completada (Categorías: entidad + CRUD admin + soft delete + auditoría por log). Falta 1.4 (Google Login), pospuesta.
+**Última actualización:** 2026-07-03 — Fase 3 completada (Productos: entidad + SKU + imágenes + CRUD admin + FluentValidation). Falta 1.4 (Google Login), pospuesta.
 
 ---
 
@@ -71,9 +71,14 @@
   - Verificado en runtime como admin: crear/listar/editar/soft-delete OK, duplicado (distinto case) rechazado, query filter oculta la borrada, logs `[AUDIT]` con el actor.
 
 ## Fase 3 — Productos
-- [ ] **3.1** Entidad + relación con categoría + soft delete (global filter) + migración. ⬜
-- [ ] **3.2** Generador de SKU (`ISkuGenerator`, no editable, formato `PRD-2026-000123`) + subida/validación de imágenes (`IFileStorageService`). ⬜
-- [ ] **3.3** CRUD admin completo + auditoría. ⬜
+- [x] **3.1** Entidad + relación con categoría + soft delete (global filter) + migración. ✅
+  - `Entities/Product` (SKU único, precios `numeric(12,2)`, FK Categoría `Restrict`, stock/minStock, soft delete, props calculadas `EffectivePrice`/`IsOnSale`/`IsOutOfStock` ignoradas) + `ProductConfiguration` (índices `Sku` único, `CategoryId`, `(IsDeleted,IsActive)`, query filter). Migración `AddProduct` + secuencia `product_sku_seq`. Verificado en Postgres.
+- [x] **3.2** Generador de SKU + subida/validación de imágenes. ✅
+  - `ISkuGenerator`/`SkuGenerator`: `nextval('product_sku_seq')` → `PRD-2026-000001` (concurrencia segura, huecos aceptados). `IFileStorageService`/`FileStorageService`: valida extensión (jpg/png/webp), content-type y tamaño (≤2 MB), regenera nombre con GUID, guarda en `wwwroot/uploads/products`, borra la anterior al reemplazar.
+- [x] **3.3** CRUD admin completo + auditoría. ✅
+  - `ProductsController` + vistas Index/Create/Edit/Delete (multipart, thumbnails, SKU solo lectura en edición). FluentValidation (`ProductFormVmValidator`) auto + adaptadores cliente. Auditoría por log `[AUDIT]` con actor y SKU. Sidebar habilita Productos.
+  - **Fixes durante validación**: (1) cultura invariante en `Program.cs` (`UseRequestLocalization`) para que los `<input type=number>` parseen decimales con punto — antes `15000.50` se guardaba como `1500050`; (2) `OverridePropertyName("SalePrice")` en el validador para que el error oferta<precio se muestre en el campo.
+  - Verificado en runtime: alta con imagen + SKU correlativo, decimales correctos, validaciones (precio>0, oferta<precio, tipo de imagen), edición con swap de imagen (borra la vieja) y SKU inmutable, soft delete + query filter, logs de auditoría.
 
 ## Fase 4 — Catálogo público
 - [ ] **4.1** `/shop` con paginación y filtro por categoría. ⬜
@@ -116,3 +121,4 @@
 | 2026-07-03 | Fase 1.5 | Área Admin protegida: política `AdminOnly`, `AdminBaseController`, `DashboardController` + layout. Ruta de áreas. Verificado (anónimo/usuario/admin). 1.4 pospuesta. |
 | 2026-07-03 | Fase 2.1 | Entidad `Category` + `CategoryConfiguration` (índice único parcial + query filter) + migración `AddCategory`. Verificado en Postgres. |
 | 2026-07-03 | Fase 2.2 | `CategoryService` (CRUD, unicidad case-insensitive, soft delete, audit log) + CRUD admin de categorías. Verificado en runtime. |
+| 2026-07-03 | Fase 3 | Productos: entidad+config+migración (3.1), `ISkuGenerator`+`IFileStorageService` (3.2), CRUD admin + FluentValidation (3.3). Fixes: cultura invariante (decimales) y OverridePropertyName. Verificado en runtime. |

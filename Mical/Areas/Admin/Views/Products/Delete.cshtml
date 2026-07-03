@@ -1,0 +1,32 @@
+@model AdminProductListItemVm
+@{
+    ViewData["Title"] = "Eliminar producto";
+}
+
+<div class="border-bottom pb-2 mb-4">
+    <h1 class="h3 mb-0">Eliminar producto</h1>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width:640px;">
+    <div class="card-body p-4">
+        <div class="d-flex gap-3 mb-3">
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="~/@Model.ImagePath" alt="@Model.Name" width="72" height="72" style="object-fit:cover;border-radius:6px;" />
+            }
+            <div>
+                <p class="mb-1">¿Seguro que querés eliminar <strong>@Model.Name</strong>?</p>
+                <p class="text-muted small mb-0">SKU @Model.Sku · @Model.CategoryName</p>
+            </div>
+        </div>
+        <p class="text-muted small">
+            Es un borrado lógico: el producto se oculta pero se conserva el historial de pedidos.
+        </p>
+
+        <form asp-action="Delete" method="post" class="d-flex gap-2">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger px-4">Sí, eliminar</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
+        </form>
+    </div>
+</div>
