@@ -1,19 +1,8 @@
 @model OrderDetailVm
-@using Mical.Entities
 @{
     ViewData["Title"] = "Pedido " + Model.OrderNumber;
     var justPlaced = ViewData["JustPlaced"] as bool? ?? false;
-
-    (string cls, string txt) = Model.Status switch
-    {
-        OrderStatus.Pendiente => ("bg-secondary", "Pendiente"),
-        OrderStatus.Pagado => ("bg-info text-dark", "Pagado"),
-        OrderStatus.Preparando => ("bg-primary", "Preparando"),
-        OrderStatus.Enviado => ("bg-warning text-dark", "Enviado"),
-        OrderStatus.Entregado => ("bg-success", "Entregado"),
-        OrderStatus.Cancelado => ("bg-danger", "Cancelado"),
-        _ => ("bg-secondary", Model.Status.ToString())
-    };
+    var (cls, txt) = Model.Status.Badge();
 }
 
 <section class="py-5" style="margin-top:90px;">

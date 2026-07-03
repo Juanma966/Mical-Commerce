@@ -60,6 +60,9 @@
                                     @if (User.Identity?.IsAuthenticated == true)
                                     {
                                         <li class="pe-3">
+                                            <a asp-controller="Order" asp-action="Index" title="Mis pedidos" class="small text-reset text-decoration-none">Mis pedidos</a>
+                                        </li>
+                                        <li class="pe-3">
                                             <a asp-controller="Account" asp-action="Profile" title="Mi perfil">
                                                 <svg class="user"><use xlink:href="#user"></use></svg>
                                             </a>

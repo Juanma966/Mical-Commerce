@@ -1,0 +1,52 @@
+@model IReadOnlyList<OrderHistoryVm>
+@using Mical.Helpers
+@{
+    ViewData["Title"] = "Mis pedidos";
+}
+
+<section class="py-5" style="margin-top:90px;">
+    <div class="container">
+        <h1 class="h3 border-bottom pb-3 mb-4">Mis pedidos</h1>
+
+        @if (Model.Count == 0)
+        {
+            <div class="text-center text-muted py-5">
+                <p class="mb-3">Todavía no hiciste ningún pedido.</p>
+                <a asp-controller="Shop" asp-action="Index" class="btn btn-dark px-4">Ir a la tienda</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Fecha</th>
+                            <th class="text-center">Ítems</th>
+                            <th class="text-end">Total</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in Model)
+                        {
+                            var badge = o.Status.Badge();
+                            <tr>
+                                <td class="fw-semibold">@o.OrderNumber</td>
+                                <td>@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">@o.ItemCount</td>
+                                <td class="text-end">$@o.Total.ToString("N2")</td>
+                                <td><span class="badge @badge.Css">@badge.Text</span></td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@o.Id">Ver</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

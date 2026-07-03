@@ -1,0 +1,54 @@
+@model IReadOnlyList<AdminOrderListItemVm>
+@{
+    ViewData["Title"] = "Pedidos";
+    var status = TempData["StatusMessage"] as string;
+}
+
+<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h1 class="h3 mb-0">Pedidos</h1>
+</div>
+
+@if (!string.IsNullOrEmpty(status))
+{
+    <div class="alert alert-info" role="alert">@status</div>
+}
+
+@if (Model.Count == 0)
+{
+    <p class="text-muted">Todavía no hay pedidos.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle bg-white">
+            <thead>
+                <tr>
+                    <th>Pedido</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th class="text-center">Ítems</th>
+                    <th class="text-end">Total</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    var badge = o.Status.Badge();
+                    <tr>
+                        <td class="fw-semibold">@o.OrderNumber</td>
+                        <td class="small">@o.CustomerEmail</td>
+                        <td>@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-center">@o.ItemCount</td>
+                        <td class="text-end">$@o.Total.ToString("N2")</td>
+                        <td><span class="badge @badge.Css">@badge.Text</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@o.Id">Ver / gestionar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

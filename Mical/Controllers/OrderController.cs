@@ -19,6 +19,14 @@ public class OrderController : Controller
         _userManager = userManager;
     }
 
+    // GET: /order  → "Mis pedidos"
+    public async Task<IActionResult> Index()
+    {
+        var userId = _userManager.GetUserId(User)!;
+        var orders = await _orders.GetHistoryForUserAsync(userId);
+        return View(orders);
+    }
+
     // GET: /order/details/5  (placed=true justo después de comprar → confirmación)
     public async Task<IActionResult> Details(int id, bool placed = false)
     {

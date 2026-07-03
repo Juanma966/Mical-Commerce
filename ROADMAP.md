@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — Fase 5 completada (Carrito: cart.js LocalStorage + UI /cart + endpoint de re-validación). Falta 1.4 (Google Login), pospuesta.
+**Última actualización:** 2026-07-03 — Fase 6 completada (Checkout + pedidos usuario + gestión admin con máquina de estados y reposición de stock). Falta 1.4 (Google Login), pospuesta.
 
 ---
 
@@ -106,8 +106,12 @@
   - `IOrderService.CheckoutAsync`: parsea el carrito del cliente, re-valida en el servidor (existencia/activo/stock), calcula precios/total autoritativos, **descuenta stock dentro de una transacción** con reintentos ante `DbUpdateConcurrencyException`. `GetForUserAsync` (detalle solo del dueño).
   - `CheckoutController` (`[Authorize]`, GET prellenado desde el perfil + POST) y `OrderController.Details` (dueño; `placed=true` → confirmación + limpia el carrito). Vistas `Checkout/Index` (form + resumen por JS desde LocalStorage, reconcilia y postea `CartJson`) y `Order/Details` (confirmación + badge de estado). Botón "Finalizar compra" del carrito → `/checkout`.
   - Verificado en runtime: anónimo→login, compra OK (pedido `ORD-2026-000001` Pendiente, items con snapshot, stock descontado 50→48 / 3→0), stock insuficiente→rechazo con rollback (stock intacto), carrito vacío→rechazo, aislamiento por usuario (404 al ajeno). *(La carrera de concurrencia simultánea no se orquestó por HTTP; xmin+retry implementados.)*
-- [ ] **6.2** Historial y detalle de pedidos (usuario). ⬜
-- [ ] **6.3** Gestión de pedidos y cambio de estado (admin) + reposición de stock al cancelar (solo si NO estaba Entregado). ⬜
+- [x] **6.2** Historial y detalle de pedidos (usuario). ✅
+  - `OrderService.GetHistoryForUserAsync` + `OrderController.Index` ("Mis pedidos") + vista `Order/Index`. Header muestra "Mis pedidos" a usuarios autenticados. `Helpers/OrderStatusExtensions.Badge()` centraliza el badge de estado.
+- [x] **6.3** Gestión de pedidos y cambio de estado (admin) + reposición de stock al cancelar (solo si NO estaba Entregado). ✅
+  - `OrderService`: `GetAllForAdminAsync`, `GetForAdminAsync` (con email del cliente + transiciones permitidas), `UpdateStatusAsync` (máquina de estados; cancelar repone stock en transacción salvo que estuviera Entregado; usa `IgnoreQueryFilters` para reponer aun si el producto está soft-deleted; auditoría `[AUDIT]`).
+  - `Areas/Admin/Controllers/OrdersController` + vistas Index/Details (form de cambio de estado con las transiciones válidas). Sidebar habilita Pedidos.
+  - Verificado en runtime: historial de usuario, listado admin con cliente, transición inválida rechazada (estado intacto), cadena Pendiente→Pagado→Preparando→Enviado→Entregado, cancelar desde Pagado repone stock, y **cancelar desde Entregado NO repone stock**.
 
 ## Fase 7 — Auditoría y dashboard
 - [ ] **7.1** Interceptor de auditoría conectado, **solo acciones de admin** (expandir solo si hace falta). ⬜
@@ -139,3 +143,4 @@
 | 2026-07-03 | Fase 4 | Catálogo público: `ICatalogService`, `/shop` (filtro+paginación+búsqueda `pg_trgm`), `/product/{id}` (detalle + "Sin stock"). Header enlaza a la tienda. Verificado en runtime. |
 | 2026-07-03 | Fase 5 | Carrito: `cart.js` (LocalStorage) + `/cart` (UI por JS) + `POST /cart/rehydrate` (re-valida precio/stock server-side). Verificado endpoint + markup; JS cableado + browser real. |
 | 2026-07-03 | Fase 6.1 | Checkout: entidades Order/OrderItem + `OrderService.CheckoutAsync` (transacción, descuento de stock, xmin) + `/checkout` + confirmación. Verificado en runtime. |
+| 2026-07-03 | Fase 6.2/6.3 | "Mis pedidos" (usuario) + gestión admin de pedidos: máquina de estados, cambio de estado y reposición de stock al cancelar (solo si no estaba Entregado). Verificado en runtime. |
