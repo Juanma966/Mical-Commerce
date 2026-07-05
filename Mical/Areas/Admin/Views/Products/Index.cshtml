@@ -35,7 +35,7 @@ else
                         <td style="width:52px;">
                             @if (!string.IsNullOrEmpty(p.ImagePath))
                             {
-                                <img src="~/@p.ImagePath" alt="@p.Name" width="44" height="44" style="object-fit:cover;border-radius:6px;" />
+                                <img src="~/@p.ImagePath" alt="@p.Name" width="44" height="44" style="object-fit:cover;border-radius:6px;" loading="lazy" decoding="async" />
                             }
                             else
                             {

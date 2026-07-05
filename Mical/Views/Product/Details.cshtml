@@ -18,7 +18,7 @@
                 <div class="bg-light rounded" style="aspect-ratio:1/1;overflow:hidden;">
                     @if (!string.IsNullOrEmpty(Model.ImagePath))
                     {
-                        <img src="~/@Model.ImagePath" alt="@Model.Name" class="w-100 h-100" style="object-fit:cover;" />
+                        <img src="~/@Model.ImagePath" alt="@Model.Name" class="w-100 h-100" style="object-fit:cover;" fetchpriority="high" decoding="async" />
                     }
                 </div>
             </div>

@@ -9,7 +9,7 @@
 
 <section id="billboard" class="position-relative overflow-hidden" style="margin-top:104px;">
     <a asp-controller="Shop" asp-action="Index" class="d-block" title="Ir a la tienda">
-        <img src="~/images/mical-hero-banner.webp" alt="Mical — Tu librería cristiana en casa" class="w-100 d-block" />
+        <img src="~/images/mical-hero-banner.webp" alt="Mical — Tu librería cristiana en casa" class="w-100 d-block" fetchpriority="high" decoding="async" />
     </a>
     <div class="text-center py-4">
         <a asp-controller="Shop" asp-action="Index" class="btn btn-medium btn-dark text-uppercase btn-rounded-none">Ver productos</a>
@@ -81,7 +81,7 @@
                     <div class="swiper-slide">
                         <div class="product-card position-relative">
                             <div class="image-holder">
-                                <img src="~/images/product-item1.jpg" alt="producto" class="img-fluid">
+                                <img src="~/images/product-item1.jpg" alt="producto" class="img-fluid" loading="lazy" decoding="async">
                             </div>
                             <div class="cart-concern position-absolute">
                                 <div class="cart-button d-flex">
@@ -97,7 +97,7 @@
                     <div class="swiper-slide">
                         <div class="product-card position-relative">
                             <div class="image-holder">
-                                <img src="~/images/product-item2.jpg" alt="producto" class="img-fluid">
+                                <img src="~/images/product-item2.jpg" alt="producto" class="img-fluid" loading="lazy" decoding="async">
                             </div>
                             <div class="cart-concern position-absolute">
                                 <div class="cart-button d-flex">
@@ -113,7 +113,7 @@
                     <div class="swiper-slide">
                         <div class="product-card position-relative">
                             <div class="image-holder">
-                                <img src="~/images/product-item3.jpg" alt="producto" class="img-fluid">
+                                <img src="~/images/product-item3.jpg" alt="producto" class="img-fluid" loading="lazy" decoding="async">
                             </div>
                             <div class="cart-concern position-absolute">
                                 <div class="cart-button d-flex">
@@ -129,7 +129,7 @@
                     <div class="swiper-slide">
                         <div class="product-card position-relative">
                             <div class="image-holder">
-                                <img src="~/images/product-item4.jpg" alt="producto" class="img-fluid">
+                                <img src="~/images/product-item4.jpg" alt="producto" class="img-fluid" loading="lazy" decoding="async">
                             </div>
                             <div class="cart-concern position-absolute">
                                 <div class="cart-button d-flex">
@@ -145,7 +145,7 @@
                     <div class="swiper-slide">
                         <div class="product-card position-relative">
                             <div class="image-holder">
-                                <img src="~/images/product-item5.jpg" alt="producto" class="img-fluid">
+                                <img src="~/images/product-item5.jpg" alt="producto" class="img-fluid" loading="lazy" decoding="async">
                             </div>
                             <div class="cart-concern position-absolute">
                                 <div class="cart-button d-flex">
@@ -167,7 +167,7 @@
 
 <section id="yearly-sale" class="overflow-hidden mt-5">
     <a asp-controller="Shop" asp-action="Index" class="d-block" title="Ver ofertas">
-        <img src="~/images/mical-hero-banner.webp" alt="Ofertas de temporada" class="w-100 d-block" />
+        <img src="~/images/mical-hero-banner.webp" alt="Ofertas de temporada" class="w-100 d-block" loading="lazy" decoding="async" />
     </a>
 </section>
 
@@ -183,7 +183,7 @@
             <div class="post-grid d-flex flex-wrap justify-content-between">
                 <div class="col-lg-4 col-sm-12">
                     <div class="card border-none me-3">
-                        <div class="card-image"><img src="~/images/post-item1.jpg" alt="" class="img-fluid"></div>
+                        <div class="card-image"><img src="~/images/post-item1.jpg" alt="" class="img-fluid" loading="lazy" decoding="async"></div>
                     </div>
                     <div class="card-body text-uppercase">
                         <div class="card-meta text-muted">
@@ -195,7 +195,7 @@
                 </div>
                 <div class="col-lg-4 col-sm-12">
                     <div class="card border-none me-3">
-                        <div class="card-image"><img src="~/images/post-item2.jpg" alt="" class="img-fluid"></div>
+                        <div class="card-image"><img src="~/images/post-item2.jpg" alt="" class="img-fluid" loading="lazy" decoding="async"></div>
                     </div>
                     <div class="card-body text-uppercase">
                         <div class="card-meta text-muted">
@@ -207,7 +207,7 @@
                 </div>
                 <div class="col-lg-4 col-sm-12">
                     <div class="card border-none me-3">
-                        <div class="card-image"><img src="~/images/post-item3.jpg" alt="" class="img-fluid"></div>
+                        <div class="card-image"><img src="~/images/post-item3.jpg" alt="" class="img-fluid" loading="lazy" decoding="async"></div>
                     </div>
                     <div class="card-body text-uppercase">
                         <div class="card-meta text-muted">
@@ -309,7 +309,7 @@
             <div class="d-flex flex-wrap">
                 <figure class="instagram-item pe-2">
                     <a href="#" class="image-link position-relative">
-                        <img src="~/images/insta-item1.jpg" alt="instagram" class="insta-image">
+                        <img src="~/images/insta-item1.jpg" alt="instagram" class="insta-image" loading="lazy" decoding="async">
                         <div class="icon-overlay position-absolute d-flex justify-content-center">
                             <svg class="instagram"><use xlink:href="#instagram"></use></svg>
                         </div>
@@ -317,7 +317,7 @@
                 </figure>
                 <figure class="instagram-item pe-2">
                     <a href="#" class="image-link position-relative">
-                        <img src="~/images/insta-item2.jpg" alt="instagram" class="insta-image">
+                        <img src="~/images/insta-item2.jpg" alt="instagram" class="insta-image" loading="lazy" decoding="async">
                         <div class="icon-overlay position-absolute d-flex justify-content-center">
                             <svg class="instagram"><use xlink:href="#instagram"></use></svg>
                         </div>
@@ -325,7 +325,7 @@
                 </figure>
                 <figure class="instagram-item pe-2">
                     <a href="#" class="image-link position-relative">
-                        <img src="~/images/insta-item3.jpg" alt="instagram" class="insta-image">
+                        <img src="~/images/insta-item3.jpg" alt="instagram" class="insta-image" loading="lazy" decoding="async">
                         <div class="icon-overlay position-absolute d-flex justify-content-center">
                             <svg class="instagram"><use xlink:href="#instagram"></use></svg>
                         </div>
@@ -333,7 +333,7 @@
                 </figure>
                 <figure class="instagram-item pe-2">
                     <a href="#" class="image-link position-relative">
-                        <img src="~/images/insta-item4.jpg" alt="instagram" class="insta-image">
+                        <img src="~/images/insta-item4.jpg" alt="instagram" class="insta-image" loading="lazy" decoding="async">
                         <div class="icon-overlay position-absolute d-flex justify-content-center">
                             <svg class="instagram"><use xlink:href="#instagram"></use></svg>
                         </div>
@@ -341,7 +341,7 @@
                 </figure>
                 <figure class="instagram-item pe-2">
                     <a href="#" class="image-link position-relative">
-                        <img src="~/images/insta-item5.jpg" alt="instagram" class="insta-image">
+                        <img src="~/images/insta-item5.jpg" alt="instagram" class="insta-image" loading="lazy" decoding="async">
                         <div class="icon-overlay position-absolute d-flex justify-content-center">
                             <svg class="instagram"><use xlink:href="#instagram"></use></svg>
                         </div>

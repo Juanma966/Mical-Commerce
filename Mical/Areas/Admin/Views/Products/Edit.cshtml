@@ -46,7 +46,7 @@
                     @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
                     {
                         <div class="mb-2">
-                            <img src="~/@Model.ExistingImagePath" alt="Imagen actual" width="72" height="72" style="object-fit:cover;border-radius:6px;" />
+                            <img src="~/@Model.ExistingImagePath" alt="Imagen actual" width="72" height="72" style="object-fit:cover;border-radius:6px;" loading="lazy" decoding="async" />
                         </div>
                     }
                     <input asp-for="Image" type="file" accept="image/*" class="form-control" />

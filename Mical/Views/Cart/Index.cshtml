@@ -133,7 +133,7 @@
 
                 $lines.innerHTML = visible.map(function (l) {
                     var img = l.imagePath
-                        ? '<img src="/' + esc(l.imagePath) + '" alt="" width="56" height="56" style="object-fit:cover;border-radius:6px;">'
+                        ? '<img src="/' + esc(l.imagePath) + '" alt="" width="56" height="56" loading="lazy" decoding="async" style="object-fit:cover;border-radius:6px;">'
                         : '<span class="d-inline-block bg-light border rounded" style="width:56px;height:56px;"></span>';
                     return '' +
                         '<tr>' +

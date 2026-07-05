@@ -12,7 +12,7 @@
         <div class="d-flex gap-3 mb-3">
             @if (!string.IsNullOrEmpty(Model.ImagePath))
             {
-                <img src="~/@Model.ImagePath" alt="@Model.Name" width="72" height="72" style="object-fit:cover;border-radius:6px;" />
+                <img src="~/@Model.ImagePath" alt="@Model.Name" width="72" height="72" style="object-fit:cover;border-radius:6px;" loading="lazy" decoding="async" />
             }
             <div>
                 <p class="mb-1">¿Seguro que querés eliminar <strong>@Model.Name</strong>?</p>
