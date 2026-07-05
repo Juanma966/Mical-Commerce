@@ -8,7 +8,7 @@ Version:
 Logo Mical (el logo es cuadrado; se limita la altura para el header/footer)
 --------------------------------------------------------------*/
 .site-header .logo {
-    height: 72px;
+    height: 88px;
     width: auto;
 }
 
@@ -43,8 +43,12 @@ CSS STRUCTURE:
   --gray-color-500:           #AEAEAE;
   --gray-color-800:           #3A3A3A;
   --light-gray-color:         #D7DDDF;
-  --primary-color:            #72AEC8;
-  --bs-primary-rgb:           114,174,200;
+  /* Paleta de marca Mical */
+  --primary-color:            #7E5FA4;   /* violeta del wordmark */
+  --primary-dark-color:       #684D8A;   /* violeta hover */
+  --brand-slate-color:        #3E4A5B;   /* azul pizarra del banner */
+  --brand-cream-color:        #F6F1E4;   /* crema del banner */
+  --bs-primary-rgb:           126,95,164;
   --light-color:              #f8f9fa;
   --dark-color:               #212529;
   --light-blue-color:         #EDF1F3;
@@ -107,6 +111,41 @@ a.light {
 }
 a:hover {
   text-decoration: none;
+  color: var(--primary-color);
+}
+
+/*------------ Marca Mical: CTA en violeta -----------*/
+/* El botón principal del sitio usa .btn-dark; lo pintamos con el violeta de marca. */
+.btn.btn-dark,
+.btn.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white-color);
+}
+.btn.btn-dark:hover,
+.btn.btn-dark:focus,
+.btn.btn-dark:active,
+.btn.btn-primary:hover,
+.btn.btn-primary:focus,
+.btn.btn-primary:active {
+  background-color: var(--primary-dark-color);
+  border-color: var(--primary-dark-color);
+  color: var(--white-color);
+}
+.btn.btn-outline-dark {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+.btn.btn-outline-dark:hover,
+.btn.btn-outline-dark:focus {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white-color);
+}
+
+/* Nav: link activo / hover en violeta */
+.site-header .navbar-nav .nav-link:hover,
+.site-header .navbar-nav .nav-link.active {
   color: var(--primary-color);
 }
 
@@ -598,8 +637,10 @@ h3.cart-title {
 /*----------------------------------------------*/
 .site-header {
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    z-index: 10;
+    z-index: 1030;
     transition: background 0.3s ease-out;
 }
 .navbar-toggler svg.navbar-icon {
