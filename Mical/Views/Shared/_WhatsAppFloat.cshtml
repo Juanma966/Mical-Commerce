@@ -1,0 +1,14 @@
+@inject IConfiguration Configuration
+@{
+    var waNumber = Configuration["Business:WhatsAppNumber"];
+}
+@if (!string.IsNullOrWhiteSpace(waNumber))
+{
+    var digits = new string(waNumber.Where(char.IsDigit).ToArray());
+    var text = Uri.EscapeDataString("¡Hola! Quería hacer una consulta sobre un producto de Mical.");
+    var href = $"https://wa.me/{digits}?text={text}";
+    <a class="wa-float" href="@href" target="_blank" rel="noopener"
+       aria-label="Escribinos por WhatsApp">
+        <svg width="30" height="30" role="img" aria-hidden="true"><use href="#whatsapp"></use></svg>
+    </a>
+}
