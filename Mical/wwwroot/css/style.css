@@ -1,11 +1,22 @@
 /*
-Theme Name: Ministore
-Theme URI: 
-Author: 
-Author URI: 
-Description: Ministore is specially designed product packaged for Ministore by Moksha.
-Version: 
+Theme Name: Mical
+Description: Tema de Mical — Librería y Regalería Cristiana (basado en la plantilla MiniStore).
+Version:
 */
+
+/*--------------------------------------------------------------
+Logo Mical (el logo es cuadrado; se limita la altura para el header/footer)
+--------------------------------------------------------------*/
+.site-header .logo {
+    height: 72px;
+    width: auto;
+}
+
+.footer-logo {
+    max-width: 170px;
+    height: auto;
+    margin-bottom: 1rem;
+}
 
 /*--------------------------------------------------------------
 This is main CSS file that contains custom style rules used in this template
