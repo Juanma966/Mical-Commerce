@@ -97,6 +97,15 @@ public class AccountController : Controller
         if (result.Succeeded)
         {
             _logger.LogInformation("Inicio de sesión: {Email}", model.Email);
+
+            // Sin returnUrl explícito, los administradores van directo al panel.
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                var user = await _signInManager.UserManager.FindByEmailAsync(model.Email);
+                if (user is not null && await _signInManager.UserManager.IsInRoleAsync(user, Roles.Administrador))
+                    return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+            }
+
             return RedirectToLocal(returnUrl);
         }
 
