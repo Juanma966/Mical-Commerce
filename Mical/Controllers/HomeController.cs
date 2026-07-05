@@ -1,21 +1,25 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Mical.Models;
+using Mical.Services.Interfaces;
 
 namespace Mical.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly ICatalogService _catalog;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, ICatalogService catalog)
     {
         _logger = logger;
+        _catalog = catalog;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var featured = await _catalog.GetFeaturedAsync(8);
+        return View(featured);
     }
 
     public IActionResult Privacy()

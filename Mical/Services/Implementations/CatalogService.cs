@@ -71,6 +71,27 @@ public class CatalogService : ICatalogService
         };
     }
 
+    public async Task<IReadOnlyList<ProductCardVm>> GetFeaturedAsync(int count)
+    {
+        count = count is < 1 or > 24 ? 8 : count;
+
+        return await _db.Products
+            .Where(p => p.IsActive && p.Category!.IsActive)
+            .OrderByDescending(p => p.Id)
+            .Take(count)
+            .Select(p => new ProductCardVm
+            {
+                Id = p.Id,
+                Name = p.Name,
+                ImagePath = p.ImagePath,
+                Price = p.Price,
+                EffectivePrice = p.SalePrice ?? p.Price,
+                IsOnSale = p.SalePrice != null && p.SalePrice < p.Price,
+                IsOutOfStock = p.Stock <= 0
+            })
+            .ToListAsync();
+    }
+
     public async Task<CartVm> RehydrateCartAsync(IEnumerable<CartItemInput> items)
     {
         // Une duplicados y descarta entradas inválidas. La cantidad pedida se limita

@@ -10,6 +10,12 @@ public interface ICatalogService
 {
     Task<ShopIndexVm> GetShopAsync(int? categoryId, string? query, int page, int pageSize);
 
+    /// <summary>
+    /// Productos para la sección "destacados" de la home. Por ahora toma los más
+    /// recientes activos; a futuro puede filtrar por un flag IsFeatured.
+    /// </summary>
+    Task<IReadOnlyList<ProductCardVm>> GetFeaturedAsync(int count);
+
     Task<ProductDetailVm?> GetProductDetailAsync(int id);
 
     /// <summary>
