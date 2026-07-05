@@ -34,7 +34,27 @@
     <script src="~/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/plugins.js"></script>
     <script src="~/js/script.js"></script>
+    <script src="~/js/ui.js"></script>
     <script src="~/js/cart.js"></script>
+    @{
+        var toastOk = TempData["StatusMessage"] as string;
+        var toastErr = TempData["ErrorMessage"] as string;
+    }
+    @if (!string.IsNullOrEmpty(toastOk) || !string.IsNullOrEmpty(toastErr))
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                @if (!string.IsNullOrEmpty(toastOk))
+                {
+                    <text>window.UI.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(toastOk)), "success");</text>
+                }
+                @if (!string.IsNullOrEmpty(toastErr))
+                {
+                    <text>window.UI.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(toastErr)), "error");</text>
+                }
+            });
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

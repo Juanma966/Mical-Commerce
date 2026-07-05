@@ -1,18 +1,12 @@
 @model IReadOnlyList<AdminCategoryListItemVm>
 @{
     ViewData["Title"] = "Categorías";
-    var status = TempData["StatusMessage"] as string;
 }
 
 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
     <h1 class="h3 mb-0">Categorías</h1>
     <a class="btn btn-dark" asp-action="Create">Nueva categoría</a>
 </div>
-
-@if (!string.IsNullOrEmpty(status))
-{
-    <div class="alert alert-success" role="alert">@status</div>
-}
 
 @if (Model.Count == 0)
 {

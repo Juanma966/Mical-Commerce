@@ -77,6 +77,7 @@
 
                 if (items.length === 0) { return render({ lines: [], total: 0, hasIssues: false }); }
 
+                if (window.UI) { window.UI.loader.show(); }
                 try {
                     var res = await fetch("/cart/rehydrate", {
                         method: "POST",
@@ -87,6 +88,8 @@
                 } catch (e) {
                     $issues.textContent = "No pudimos cargar tu carrito. Probá de nuevo.";
                     $issues.classList.remove("d-none");
+                } finally {
+                    if (window.UI) { window.UI.loader.hide(); }
                 }
             }
 

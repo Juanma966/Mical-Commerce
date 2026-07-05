@@ -1,7 +1,6 @@
 @model AdminOrderDetailVm
 @{
     ViewData["Title"] = "Pedido " + Model.OrderNumber;
-    var status = TempData["StatusMessage"] as string;
     var badge = Model.Status.Badge();
 }
 
@@ -12,11 +11,6 @@
     </div>
     <a class="btn btn-outline-secondary" asp-action="Index">Volver</a>
 </div>
-
-@if (!string.IsNullOrEmpty(status))
-{
-    <div class="alert alert-info" role="alert">@status</div>
-}
 
 <div class="row g-4">
     <div class="col-lg-8">

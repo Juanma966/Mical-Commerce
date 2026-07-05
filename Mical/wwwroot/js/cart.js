@@ -85,10 +85,16 @@
             }
             add(id, qty);
 
-            var original = btn.getAttribute("data-label") || btn.textContent;
-            btn.setAttribute("data-label", original);
-            btn.textContent = "Agregado ✓";
-            setTimeout(function () { btn.textContent = original; }, 1200);
+            var name = btn.getAttribute("data-product-name");
+            var msg = name ? name + " agregado al carrito" : "Producto agregado al carrito";
+            if (window.UI && window.UI.toast) {
+                window.UI.toast(msg, "success");
+            } else {
+                var original = btn.getAttribute("data-label") || btn.textContent;
+                btn.setAttribute("data-label", original);
+                btn.textContent = "Agregado ✓";
+                setTimeout(function () { btn.textContent = original; }, 1200);
+            }
         });
     });
 })();
