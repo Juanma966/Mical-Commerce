@@ -175,7 +175,7 @@ Reutilizar una vista existente como base: copiá el `.cshtml` más parecido (p. 
 
 - `wwwroot/css/bootstrap.min.css`, `wwwroot/css/vendor.css`, `wwwroot/js/jquery*`,
   `wwwroot/js/bootstrap*`, `wwwroot/js/plugins.js`, `wwwroot/js/modernizr.js` → **vendor**.
-- El **orden de carga de scripts** en `_Layout` (jQuery → Swiper → Bootstrap → plugins → script/cart).
+- El **orden de carga de scripts** en `_Layout` (jQuery → Swiper → Bootstrap → plugins → `script.js` → `ui.js` → `cart.js` → `search.js`). `ui.js` va antes de `cart.js` porque el carrito usa los toasts.
 - `_ViewImports.cshtml` salvo para sumar un `@using` nuevo.
 
 ---
@@ -189,3 +189,54 @@ Del logo de Mical:
 
 > Si querés que el sitio adopte estos colores (botones, links, acentos) en vez del
 > negro/gris de la plantilla, se centraliza en `style.css`. Pedilo y lo aplico.
+
+---
+
+## 8. Utilidades reutilizables (Mejoras v1.0)
+
+Estas piezas ya existen: **reusalas** en vez de reinventarlas.
+
+### Toasts y Loader — `wwwroot/js/ui.js` → `window.UI`
+```js
+UI.toast("Producto agregado al carrito", "success"); // success | error | warning | info
+UI.loader.show();   // overlay con spinner (soporta anidados)
+UI.loader.hide();   // se oculta cuando todas las tareas terminaron
+```
+- **Desde el servidor (patrón PRG):** poné el mensaje en `TempData` y el `_Layout` lo muestra como toast solo:
+  ```csharp
+  TempData["StatusMessage"] = "Guardado."; // → toast verde
+  TempData["ErrorMessage"]  = "Ups.";      // → toast rojo
+  ```
+  **No** agregues `<div class="alert">` a mano para esto; ya se centraliza.
+- Estilos: `style.css` sección 14.
+
+### Botón "Agregar al carrito"
+Botón con `class="js-add-to-cart"` + `data-product-id` (y opcional `data-product-name` para el toast, `data-qty-target="#selector"` para leer la cantidad). Lo maneja `cart.js` (delegado).
+
+### Botón "Volver a pedir"
+`class="js-reorder"` + `data-reorder-id="@order.Id"`. `cart.js` consulta `/order/reorder/{id}`, carga los ítems disponibles y redirige a `/cart`.
+
+### WhatsApp — `Helpers/WhatsAppHelper`
+- Número del negocio: `Business:WhatsAppNumber` en `appsettings.json`.
+- Botón flotante global: partial `_WhatsAppFloat` (ya está en `_Layout`).
+- Link de un pedido: `WhatsAppHelper.BuildOrderLink(Configuration["Business:WhatsAppNumber"], orderVm)` (devuelve `null` si no hay número → ocultá el botón).
+
+### Imágenes → lazy loading
+- Below-the-fold: `loading="lazy" decoding="async"`.
+- Imagen principal / hero (LCP): **no** uses lazy; poné `fetchpriority="high" decoding="async"`.
+
+### SEO por vista (vía `ViewData`)
+El `_Layout` arma `<title>`, description, canonical, Open Graph y Twitter Card. Para personalizar una vista:
+```cshtml
+@{
+    ViewData["Title"]       = "Nombre de la página"; // "<Title> - Mical"
+    ViewData["Description"] = "Descripción para buscadores/redes (≤160).";
+    ViewData["OgImage"]     = Model.ImagePath; // ruta relativa o URL absoluta
+    ViewData["OgType"]      = "product";       // opcional
+    ViewData["NoIndex"]     = true;            // opcional: excluir de buscadores
+}
+```
+Los controllers privados (Account/Cart/Checkout/Order) y el área Admin ya salen `noindex` automáticamente.
+
+### Búsqueda predictiva
+La maneja `search.js` sobre el input del header (`.js-search-input`) contra `/shop/suggest`. No requiere tocar nada salvo que muevas el buscador.

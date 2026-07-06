@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-03 — **ROADMAP COMPLETO** (Fases 0-8). Precios en es-AR. **Google Login descartado por decisión: solo ASP.NET Identity.**
+**Última actualización:** 2026-07-06 — Fases 0-8 cerradas. **En curso: capa de Mejoras v1.0** (9 de 15 pasos hechos; ver sección al final).
 
 ---
 
@@ -135,6 +135,49 @@
 
 ---
 
+## Mejoras v1.0 — Capa de mejoras (sobre las Fases 0-8 ya cerradas)
+
+> Roadmap de mejoras sobre el e-commerce funcional. Orden: de lo más simple a lo más complejo.
+> **Tiers:** 🟢 frontend puro · 🟡 lógica sin migración · 🟠 requiere migración/entidad · 🔴 infra externa.
+
+### 🟢 Tier 1 — Frontend puro (sin BD) — COMPLETO
+- [x] **M1** Toasts + Loader reutilizables. ✅ (`bc61816`)
+  - `wwwroot/js/ui.js` → `window.UI.toast(msg, tipo)` (success/error/warning/info) y `UI.loader` (overlay con spinner, soporta llamadas anidadas). CSS sección 14 de `style.css`.
+  - Puente global en `_Layout`: `TempData["StatusMessage"]`/`["ErrorMessage"]` → toast. Se eliminaron los `alert` inline duplicados (perfil, productos, categorías, pedidos admin).
+  - "Agregar al carrito" y `/cart` usan toast/loader.
+- [x] **M2** Botón flotante de WhatsApp. ✅ (`ac17f7e`)
+  - Partial `_WhatsAppFloat` (lee `Business:WhatsAppNumber`, arma link `wa.me` con mensaje pre-cargado; no renderiza si no hay número). Symbol `whatsapp` en el sprite. CSS sección 15.
+- [x] **M3** Lazy loading de imágenes. ✅ (`8f943d8`)
+  - `loading="lazy" decoding="async"` en imágenes below-the-fold; `fetchpriority="high"` en las LCP (hero de home, imagen principal de producto).
+- [x] **M4** SEO básico. ✅ (`03ba5af`)
+  - `_Layout` genera description/canonical/OpenGraph/Twitter por vista vía `ViewData`; `noindex` automático en controllers privados (Account/Cart/Checkout/Order) y área Admin. Detalle de producto expone description + `og:image` reales (`og:type=product`). `robots.txt` con rutas privadas bloqueadas.
+- [x] **M5** Optimización móvil + carrito móvil. ✅ (`2bae6f1`)
+  - Carrito en <768px como tarjetas apiladas (sin scroll horizontal, etiquetas por `data-label`). Ajustes táctiles (btn-lg 48px, inputs 16px anti-zoom iOS). CSS secciones 16-17.
+
+### 🟡 Tier 2 — Lógica sin migración — COMPLETO
+- [x] **M6** Confirmación de pedido por WhatsApp. ✅ (`0c5feef`)
+  - `Helpers/WhatsAppHelper` arma el mensaje del pedido (número, ítems, total, envío, contacto) + link `wa.me`. Botón grande en la confirmación de compra + botón secundario en el detalle del pedido.
+- [x] **M7** Botón "Volver a pedir". ✅ (`d2d1bcc`)
+  - `OrderController.Reorder(id)` revalida stock (reusa `RehydrateCartAsync`) y devuelve JSON con los ítems disponibles. Handler delegado `.js-reorder` en `cart.js` → carga al carrito (loader + toasts) y redirige a `/cart`. Botones en historial y detalle.
+- [x] **M8** Búsqueda predictiva. ✅ (`2ec5bf7`)
+  - `CatalogService.SuggestAsync` (mín. 2 chars, top 6, índice trigram) + `/shop/suggest` (JSON). `search.js`: dropdown con debounce 200ms, navegación por teclado, "Ver todos los resultados". `ProductSuggestionVm`. CSS sección 18.
+- [~] **M9** Duplicar producto + toggle Activar/Desactivar (admin). **QUITADO del plan por decisión del usuario (2026-07-06).**
+- [x] **M10** Productos relacionados. ✅ (`6565fa7`)
+  - `ProductDetailVm.Related`; el catálogo trae hasta 4 productos activos de la misma categoría (excluyendo el actual). Sección "Productos relacionados" en el detalle.
+
+### 🟠 Tier 3 — Requieren migración / entidad nueva — PENDIENTE
+- [ ] **M11** Productos destacados con flag `IsFeatured`. ⬜
+  - *(Versión simple ya hecha en `28aa579`: la home toma los más recientes activos vía `CatalogService.GetFeaturedAsync`. Falta el flag `IsFeatured` para elegirlos a mano en el admin.)*
+- [ ] **M12** Banner de promociones (entidad nueva + CRUD admin). ⬜
+- [ ] **M13** Dashboard mejorado (más métricas/gráficos). ⬜
+
+### 🔴 Tier 4 — Más complejo (infra externa) — PENDIENTE
+- [ ] **M14** WebP automático (conversión de imágenes al subir). ⬜
+- [ ] **M15** Sitemap.xml dinámico. ⬜ *(el `robots.txt` ya quedó listo esperándolo.)*
+- [ ] **M16** Recuperación de contraseña (requiere SMTP / envío de email). ⬜
+
+---
+
 ## Bitácora
 | Fecha | Tarea | Nota |
 |---|---|---|
@@ -159,3 +202,6 @@
 | 2026-07-03 | Fase 8 | Endurecimiento prod: rate limiting (login/registro), antiforgery global, forwarded headers, `appsettings.Production.json`, `PRODUCTION.md`. Smoke test completo verde. |
 | 2026-07-03 | UX precios | Display de precios en formato es-AR (`ToMoney()` + `toLocaleString` en JS). Verificado en runtime. |
 | 2026-07-03 | Fase 1.4 (descartada) | Google Login implementado y verificado, luego **revertido por decisión**: se usa solo ASP.NET Identity. |
+| 2026-07-05 | Mejoras v1.0 · M1-M3 | Toasts+Loader (`ui.js`), botón flotante de WhatsApp, lazy loading. Home muestra productos destacados reales (versión simple). |
+| 2026-07-06 | Mejoras v1.0 · M4-M5 | SEO básico (meta/OG/Twitter/robots), optimización móvil + carrito responsive. **Tier 1 cerrado.** |
+| 2026-07-06 | Mejoras v1.0 · M6-M8, M10 | Confirmación de pedido por WhatsApp, "Volver a pedir", búsqueda predictiva, productos relacionados. **M9 (duplicar/toggle) quitado. Tier 2 cerrado.** |
