@@ -16,6 +16,12 @@ public interface ICatalogService
     /// </summary>
     Task<IReadOnlyList<ProductCardVm>> GetFeaturedAsync(int count);
 
+    /// <summary>
+    /// Sugerencias para el autocomplete del buscador (coincidencia por nombre).
+    /// Devuelve vacío si la consulta es demasiado corta.
+    /// </summary>
+    Task<IReadOnlyList<ProductSuggestionVm>> SuggestAsync(string query, int limit);
+
     Task<ProductDetailVm?> GetProductDetailAsync(int id);
 
     /// <summary>

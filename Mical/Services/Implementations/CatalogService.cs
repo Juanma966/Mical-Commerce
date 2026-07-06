@@ -92,6 +92,28 @@ public class CatalogService : ICatalogService
             .ToListAsync();
     }
 
+    public async Task<IReadOnlyList<ProductSuggestionVm>> SuggestAsync(string query, int limit)
+    {
+        query = string.IsNullOrWhiteSpace(query) ? string.Empty : query.Trim();
+        if (query.Length < 2)
+            return Array.Empty<ProductSuggestionVm>();
+
+        limit = limit is < 1 or > 10 ? 6 : limit;
+
+        return await _db.Products
+            .Where(p => p.IsActive && p.Category!.IsActive && EF.Functions.ILike(p.Name, $"%{query}%"))
+            .OrderByDescending(p => p.Id)
+            .Take(limit)
+            .Select(p => new ProductSuggestionVm
+            {
+                Id = p.Id,
+                Name = p.Name,
+                ImagePath = p.ImagePath,
+                Price = p.SalePrice ?? p.Price
+            })
+            .ToListAsync();
+    }
+
     public async Task<CartVm> RehydrateCartAsync(IEnumerable<CartItemInput> items)
     {
         // Une duplicados y descarta entradas inválidas. La cantidad pedida se limita

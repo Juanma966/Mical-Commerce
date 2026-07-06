@@ -1294,6 +1294,81 @@ figure.instagram-item img.insta-image {
     #cart-content .col-lg-4 { margin-top: 1.25rem; }
 }
 
+/* 18. Búsqueda predictiva (autocomplete)
+--------------------------------------------------------------*/
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    margin-top: .4rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .18);
+    overflow: hidden;
+    max-height: min(70vh, 460px);
+    overflow-y: auto;
+    text-align: left;
+}
+
+.search-suggestions__item {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .6rem .9rem;
+    color: #222;
+    text-decoration: none;
+    border-bottom: 1px solid #f2f2f2;
+}
+.search-suggestions__item:hover,
+.search-suggestions__item.is-active {
+    background: #f6f2fa;
+    color: #222;
+}
+.search-suggestions__item img,
+.search-suggestions__noimg {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #f0f0f0;
+}
+.search-suggestions__name {
+    flex: 1 1 auto;
+    font-size: .95rem;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.search-suggestions__price {
+    flex: 0 0 auto;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: .9rem;
+}
+.search-suggestions__empty {
+    padding: .9rem;
+    color: #888;
+    font-size: .9rem;
+}
+.search-suggestions__all {
+    display: block;
+    padding: .7rem .9rem;
+    text-align: center;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+    background: #faf8fc;
+}
+.search-suggestions__all:hover {
+    color: var(--primary-color);
+    background: #f2ecf7;
+}
+
 /* 17. Ajustes táctiles/móvil generales
 --------------------------------------------------------------*/
 @media (max-width: 575.98px) {

@@ -4,9 +4,12 @@
 *@
 <div class="search-popup">
     <div class="search-popup-container">
-        <form role="search" method="get" class="search-form" asp-controller="Shop" asp-action="Index">
-            <input type="search" id="search-form" class="search-field" placeholder="Buscar y presionar enter" value="" name="q" />
+        <form role="search" method="get" class="search-form position-relative" asp-controller="Shop" asp-action="Index"
+              autocomplete="off">
+            <input type="search" id="search-form" class="search-field js-search-input" placeholder="Buscar y presionar enter" value="" name="q"
+                   role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-suggestions" />
             <button type="submit" class="search-submit"><svg class="search"><use xlink:href="#search"></use></svg></button>
+            <div id="search-suggestions" class="search-suggestions" role="listbox" hidden></div>
         </form>
 
         <h5 class="cat-list-title">Explorar</h5>

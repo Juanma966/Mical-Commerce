@@ -1,3 +1,4 @@
+using Mical.Helpers;
 using Mical.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,5 +24,19 @@ public class ShopController : Controller
     {
         var model = await _catalog.GetShopAsync(categoria, q, page, PageSize);
         return View(model);
+    }
+
+    // GET: /shop/suggest?q=  → autocomplete del buscador (JSON)
+    public async Task<IActionResult> Suggest([FromQuery(Name = "q")] string? q)
+    {
+        var items = await _catalog.SuggestAsync(q ?? string.Empty, 6);
+        return Json(items.Select(i => new
+        {
+            id = i.Id,
+            name = i.Name,
+            imagePath = i.ImagePath,
+            price = i.Price.ToMoney(),
+            url = Url.Action("Details", "Product", new { id = i.Id })
+        }));
     }
 }
