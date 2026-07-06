@@ -96,5 +96,41 @@
                 setTimeout(function () { btn.textContent = original; }, 1200);
             }
         });
+
+        // Botón "Volver a pedir" (delegado): revalida el pedido en el servidor,
+        // agrega los productos disponibles al carrito y redirige.
+        document.addEventListener("click", function (e) {
+            var btn = e.target.closest(".js-reorder");
+            if (!btn) { return; }
+            e.preventDefault();
+
+            var id = btn.getAttribute("data-reorder-id");
+            if (!id) { return; }
+
+            if (window.UI) { window.UI.loader.show(); }
+            fetch("/order/reorder/" + encodeURIComponent(id))
+                .then(function (res) {
+                    if (!res.ok) { throw new Error("http"); }
+                    return res.json();
+                })
+                .then(function (data) {
+                    var items = data.items || [];
+                    if (items.length === 0) {
+                        if (window.UI) { window.UI.toast("Ninguno de esos productos está disponible ahora.", "warning"); }
+                        return;
+                    }
+                    items.forEach(function (i) { add(i.productId, i.quantity); });
+                    if (data.adjusted && window.UI) {
+                        window.UI.toast("Algunos productos se ajustaron por disponibilidad.", "info");
+                    }
+                    window.location.href = "/cart";
+                })
+                .catch(function () {
+                    if (window.UI) { window.UI.toast("No pudimos rearmar el pedido. Probá de nuevo.", "error"); }
+                })
+                .finally(function () {
+                    if (window.UI) { window.UI.loader.hide(); }
+                });
+        });
     });
 })();

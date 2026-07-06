@@ -1,5 +1,6 @@
 using Mical.Entities;
 using Mical.Services.Interfaces;
+using Mical.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,13 @@ namespace Mical.Controllers;
 public class OrderController : Controller
 {
     private readonly IOrderService _orders;
+    private readonly ICatalogService _catalog;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public OrderController(IOrderService orders, UserManager<ApplicationUser> userManager)
+    public OrderController(IOrderService orders, ICatalogService catalog, UserManager<ApplicationUser> userManager)
     {
         _orders = orders;
+        _catalog = catalog;
         _userManager = userManager;
     }
 
@@ -37,5 +40,35 @@ public class OrderController : Controller
 
         ViewData["JustPlaced"] = placed;
         return View(order);
+    }
+
+    // GET: /order/reorder/5  → devuelve los ítems del pedido que siguen disponibles
+    // (revalidados contra stock actual) para recargarlos en el carrito del cliente.
+    public async Task<IActionResult> Reorder(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+        var order = await _orders.GetForUserAsync(id, userId);
+        if (order is null)
+            return NotFound();
+
+        var requested = order.Items
+            .Select(i => new CartItemInput { ProductId = i.ProductId, Quantity = i.Quantity })
+            .ToList();
+
+        var cart = await _catalog.RehydrateCartAsync(requested);
+
+        var available = cart.Lines
+            .Where(l => l.Available && l.Quantity > 0)
+            .Select(l => new { productId = l.ProductId, quantity = l.Quantity })
+            .ToList();
+
+        return Json(new
+        {
+            items = available,
+            // Hay ajustes si algún producto se quitó o se recortó por stock.
+            adjusted = cart.HasIssues,
+            total = order.Items.Count,
+            availableCount = available.Count
+        });
     }
 }

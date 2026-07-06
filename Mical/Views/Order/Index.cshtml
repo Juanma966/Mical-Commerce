@@ -40,7 +40,10 @@
                                 <td class="text-end">@o.Total.ToMoney()</td>
                                 <td><span class="badge @badge.Css">@badge.Text</span></td>
                                 <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@o.Id">Ver</a>
+                                    <div class="d-inline-flex gap-2">
+                                        <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@o.Id">Ver</a>
+                                        <button type="button" class="btn btn-sm btn-outline-dark js-reorder" data-reorder-id="@o.Id">Volver a pedir</button>
+                                    </div>
                                 </td>
                             </tr>
                         }
