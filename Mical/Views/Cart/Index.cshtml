@@ -136,16 +136,16 @@
                         ? '<img src="/' + esc(l.imagePath) + '" alt="" width="56" height="56" loading="lazy" decoding="async" style="object-fit:cover;border-radius:6px;">'
                         : '<span class="d-inline-block bg-light border rounded" style="width:56px;height:56px;"></span>';
                     return '' +
-                        '<tr>' +
-                        '<td style="width:72px;">' + img + '</td>' +
-                        '<td>' + esc(l.name) + '</td>' +
-                        '<td class="text-end">' + money(l.unitPrice) + '</td>' +
-                        '<td class="text-center">' +
+                        '<tr class="cart-row">' +
+                        '<td class="cart-cell-img" style="width:72px;">' + img + '</td>' +
+                        '<td class="cart-cell-name">' + esc(l.name) + '</td>' +
+                        '<td class="text-end cart-cell-price" data-label="Precio">' + money(l.unitPrice) + '</td>' +
+                        '<td class="text-center cart-cell-qty" data-label="Cantidad">' +
                             '<input type="number" min="1" max="' + l.availableStock + '" value="' + l.quantity + '" ' +
                             'class="form-control form-control-sm text-center js-qty" data-id="' + l.productId + '" style="width:80px;margin:auto;">' +
                         '</td>' +
-                        '<td class="text-end">' + money(l.lineTotal) + '</td>' +
-                        '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger js-remove" data-id="' + l.productId + '">✕</button></td>' +
+                        '<td class="text-end cart-cell-subtotal" data-label="Subtotal">' + money(l.lineTotal) + '</td>' +
+                        '<td class="text-end cart-cell-remove"><button type="button" class="btn btn-sm btn-outline-danger js-remove" data-id="' + l.productId + '" aria-label="Quitar ' + esc(l.name) + '">✕</button></td>' +
                         '</tr>';
                 }).join("");
 

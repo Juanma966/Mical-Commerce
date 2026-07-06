@@ -1235,3 +1235,73 @@ figure.instagram-item img.insta-image {
     .wa-float:hover,
     .wa-float:focus { transform: none; }
 }
+
+/* 16. Carrito responsive (tarjetas apiladas en móvil)
+--------------------------------------------------------------*/
+@media (max-width: 767.98px) {
+    /* La tabla ya no scrollea horizontal: cada fila es una tarjeta. */
+    #cart-content .table-responsive { overflow: visible; }
+    #cart-content .table thead { display: none; }
+    #cart-content .table,
+    #cart-content .table tbody { display: block; width: 100%; }
+
+    #cart-content .cart-row {
+        display: block;
+        position: relative;
+        border: 1px solid #e9e9e9;
+        border-radius: 10px;
+        padding: .85rem 2.5rem .85rem .85rem;
+        margin-bottom: .75rem;
+    }
+    #cart-content .cart-row td { display: block; border: 0; padding: 0; }
+
+    #cart-content .cart-cell-img { float: left; margin-right: .75rem; }
+    #cart-content .cart-cell-name {
+        font-weight: 600;
+        overflow: hidden;
+        padding-top: .15rem;
+        margin-bottom: .6rem;
+    }
+
+    #cart-content .cart-cell-price,
+    #cart-content .cart-cell-qty,
+    #cart-content .cart-cell-subtotal {
+        clear: both;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: .35rem 0;
+        border-top: 1px solid #f2f2f2;
+    }
+    #cart-content .cart-cell-price::before,
+    #cart-content .cart-cell-qty::before,
+    #cart-content .cart-cell-subtotal::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #666;
+    }
+    #cart-content .cart-cell-qty .js-qty { margin: 0 !important; }
+    #cart-content .cart-cell-subtotal { font-weight: 700; }
+
+    #cart-content .cart-cell-remove {
+        position: absolute;
+        top: .5rem;
+        right: .5rem;
+        padding: 0;
+    }
+
+    /* Separación entre los ítems y el resumen al apilarse. */
+    #cart-content .col-lg-4 { margin-top: 1.25rem; }
+}
+
+/* 17. Ajustes táctiles/móvil generales
+--------------------------------------------------------------*/
+@media (max-width: 575.98px) {
+    /* Los carruseles de productos no deben sangrar fuera de la pantalla. */
+    .product-swiper { padding-bottom: 2.5rem; }
+    /* Objetivos táctiles cómodos en botones principales. */
+    .btn-lg { min-height: 48px; }
+    /* Evita zoom automático de iOS al enfocar inputs (font-size < 16px). */
+    .form-control,
+    .form-select { font-size: 16px; }
+}
