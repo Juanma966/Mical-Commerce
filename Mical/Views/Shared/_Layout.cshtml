@@ -1,13 +1,65 @@
 <!DOCTYPE html>
 <html lang="es">
+@{
+    const string siteName = "Mical";
+    const string defaultDescription = "Mical — Librería y Regalería Cristiana. Productos con diseño para toda ocasión, con envíos a todo el país.";
+
+    var pageTitle = ViewData["Title"] as string;
+    var fullTitle = string.IsNullOrEmpty(pageTitle) ? siteName : $"{pageTitle} - {siteName}";
+    var metaDescription = ViewData["Description"] as string ?? defaultDescription;
+
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var canonicalUrl = ViewData["Canonical"] as string ?? $"{baseUrl}{Context.Request.Path}";
+
+    // La imagen OG puede venir como ruta relativa (ej. uploads/...) o absoluta.
+    var ogImageRaw = ViewData["OgImage"] as string ?? "images/mical-logo.webp";
+    var ogImage = ogImageRaw.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+        ? ogImageRaw
+        : $"{baseUrl}/{ogImageRaw.TrimStart('/')}";
+
+    var ogType = ViewData["OgType"] as string ?? "website";
+
+    // Páginas privadas/funcionales que no deben indexarse.
+    var routeController = Context.Request.RouteValues["controller"] as string;
+    var routeArea = Context.Request.RouteValues["area"] as string;
+    string[] privateControllers = { "Account", "Cart", "Checkout", "Order" };
+    var autoNoIndex = !string.IsNullOrEmpty(routeArea)
+        || privateControllers.Contains(routeController, StringComparer.OrdinalIgnoreCase);
+    var noindex = ViewData["NoIndex"] is true || autoNoIndex;
+}
 <head>
-    <title>@ViewData["Title"] - Mical</title>
+    <title>@fullTitle</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="description" content="Mical — Librería y Regalería Cristiana">
+    <meta name="description" content="@metaDescription">
+    @if (noindex)
+    {
+        <meta name="robots" content="noindex, nofollow">
+    }
+    else
+    {
+        <meta name="robots" content="index, follow">
+    }
+    <link rel="canonical" href="@canonicalUrl">
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="@siteName">
+    <meta property="og:type" content="@ogType">
+    <meta property="og:title" content="@(ViewData["OgTitle"] as string ?? fullTitle)">
+    <meta property="og:description" content="@metaDescription">
+    <meta property="og:url" content="@canonicalUrl">
+    <meta property="og:image" content="@ogImage">
+    <meta property="og:locale" content="es_AR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@(ViewData["OgTitle"] as string ?? fullTitle)">
+    <meta name="twitter:description" content="@metaDescription">
+    <meta name="twitter:image" content="@ogImage">
+
     <link rel="icon" type="image/webp" href="~/images/mical-logo.webp">
     <link rel="apple-touch-icon" href="~/images/mical-logo.webp">
     <link rel="stylesheet" type="text/css" href="~/css/bootstrap.min.css">

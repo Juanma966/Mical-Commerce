@@ -1,6 +1,20 @@
 @model ProductDetailVm
 @{
     ViewData["Title"] = Model.Name;
+
+    var seoDesc = !string.IsNullOrWhiteSpace(Model.Description)
+        ? Model.Description!.Trim()
+        : $"{Model.Name} — disponible en Mical, tu librería y regalería cristiana. Comprá online con envíos a todo el país.";
+    if (seoDesc.Length > 160)
+    {
+        seoDesc = seoDesc.Substring(0, 157).TrimEnd() + "…";
+    }
+    ViewData["Description"] = seoDesc;
+    ViewData["OgType"] = "product";
+    if (!string.IsNullOrEmpty(Model.ImagePath))
+    {
+        ViewData["OgImage"] = Model.ImagePath;
+    }
 }
 
 <section class="py-5" style="margin-top:90px;">

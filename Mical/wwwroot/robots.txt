@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /Account/
+Disallow: /Cart
+Disallow: /Checkout
+Disallow: /Order
+Disallow: /Admin/
+
+# Sitemap: se agrega en la fase de sitemap dinámico.
