@@ -190,7 +190,7 @@ public class CatalogService : ICatalogService
 
     public async Task<ProductDetailVm?> GetProductDetailAsync(int id)
     {
-        return await _db.Products
+        var detail = await _db.Products
             .Where(p => p.Id == id && p.IsActive && p.Category!.IsActive)
             .Select(p => new ProductDetailVm
             {
@@ -208,5 +208,32 @@ public class CatalogService : ICatalogService
                 CategoryName = p.Category!.Name
             })
             .FirstOrDefaultAsync();
+
+        if (detail is not null)
+            detail.Related = await GetRelatedAsync(detail.Id, detail.CategoryId, 4);
+
+        return detail;
+    }
+
+    // Otros productos activos de la misma categoría, excluyendo el actual.
+    private async Task<IReadOnlyList<ProductCardVm>> GetRelatedAsync(int productId, int categoryId, int count)
+    {
+        return await _db.Products
+            .Where(p => p.CategoryId == categoryId
+                        && p.Id != productId
+                        && p.IsActive && p.Category!.IsActive)
+            .OrderByDescending(p => p.Id)
+            .Take(count)
+            .Select(p => new ProductCardVm
+            {
+                Id = p.Id,
+                Name = p.Name,
+                ImagePath = p.ImagePath,
+                Price = p.Price,
+                EffectivePrice = p.SalePrice ?? p.Price,
+                IsOnSale = p.SalePrice != null && p.SalePrice < p.Price,
+                IsOutOfStock = p.Stock <= 0
+            })
+            .ToListAsync();
     }
 }

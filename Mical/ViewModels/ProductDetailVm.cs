@@ -15,4 +15,7 @@ public class ProductDetailVm
     public bool IsOutOfStock { get; set; }
     public int CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
+
+    /// <summary>Otros productos de la misma categoría (para "Productos relacionados").</summary>
+    public IReadOnlyList<ProductCardVm> Related { get; set; } = new List<ProductCardVm>();
 }

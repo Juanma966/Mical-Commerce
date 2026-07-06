@@ -82,5 +82,51 @@
                 <p class="text-muted small mb-0">SKU: @Model.Sku</p>
             </div>
         </div>
+
+        @if (Model.Related.Any())
+        {
+            <div class="mt-5 pt-4 border-top">
+                <h2 class="h4 mb-4">Productos relacionados</h2>
+                <div class="row g-4">
+                    @foreach (var item in Model.Related)
+                    {
+                        <div class="col-6 col-md-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-reset">
+                                    <div class="position-relative bg-light" style="aspect-ratio:1/1;overflow:hidden;">
+                                        @if (!string.IsNullOrEmpty(item.ImagePath))
+                                        {
+                                            <img src="~/@item.ImagePath" alt="@item.Name" class="w-100 h-100" style="object-fit:cover;" loading="lazy" decoding="async" />
+                                        }
+                                        @if (item.IsOutOfStock)
+                                        {
+                                            <span class="badge bg-danger position-absolute top-0 start-0 m-2">Sin stock</span>
+                                        }
+                                        else if (item.IsOnSale)
+                                        {
+                                            <span class="badge bg-success position-absolute top-0 start-0 m-2">Oferta</span>
+                                        }
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title mb-1">@item.Name</h6>
+                                        <div>
+                                            @if (item.IsOnSale)
+                                            {
+                                                <span class="text-decoration-line-through text-muted me-1">@item.Price.ToMoney()</span>
+                                                <strong>@item.EffectivePrice.ToMoney()</strong>
+                                            }
+                                            else
+                                            {
+                                                <strong>@item.EffectivePrice.ToMoney()</strong>
+                                            }
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </section>
