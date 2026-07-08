@@ -24,6 +24,9 @@ public interface ICatalogService
 
     Task<ProductDetailVm?> GetProductDetailAsync(int id);
 
+    /// <summary>Productos y categorías visibles para generar el sitemap.xml.</summary>
+    Task<SitemapDataVm> GetSitemapDataAsync();
+
     /// <summary>
     /// Re-valida un carrito del cliente contra la base: resuelve precios y stock
     /// actuales, recorta cantidades al stock y marca los productos no disponibles.

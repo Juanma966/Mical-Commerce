@@ -218,6 +218,27 @@ public class CatalogService : ICatalogService
         return detail;
     }
 
+    public async Task<SitemapDataVm> GetSitemapDataAsync()
+    {
+        var products = await _db.Products
+            .Where(p => p.IsActive && p.Category!.IsActive)
+            .OrderByDescending(p => p.Id)
+            .Select(p => new SitemapEntryVm
+            {
+                Id = p.Id,
+                LastModified = p.UpdatedAt ?? p.CreatedAt
+            })
+            .ToListAsync();
+
+        var categoryIds = await _db.Categories
+            .Where(c => c.IsActive)
+            .OrderBy(c => c.Id)
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        return new SitemapDataVm { Products = products, CategoryIds = categoryIds };
+    }
+
     // Otros productos activos de la misma categoría, excluyendo el actual.
     private async Task<IReadOnlyList<ProductCardVm>> GetRelatedAsync(int productId, int categoryId, int count)
     {
