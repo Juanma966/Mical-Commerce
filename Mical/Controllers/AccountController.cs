@@ -276,6 +276,12 @@ public class AccountController : Controller
                 _logger.LogError(ex, "No se pudo enviar el email de recuperación a {Email}.", user.Email);
             }
         }
+        else
+        {
+            // No se envía nada (el email no está registrado). Se registra para diagnóstico;
+            // al usuario se le muestra el mismo mensaje genérico igual.
+            _logger.LogInformation("Recuperación solicitada para email no registrado: {Email}.", model.Email);
+        }
 
         // Mensaje genérico siempre: no revelar si el email existe.
         return RedirectToAction(nameof(ForgotPasswordConfirmation));
