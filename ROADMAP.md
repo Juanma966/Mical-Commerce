@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-06 — Fases 0-8 cerradas. **En curso: capa de Mejoras v1.0** (9 de 15 pasos hechos; ver sección al final).
+**Última actualización:** 2026-07-08 — Fases 0-8 cerradas. **Mejoras v1.0: 14 de 16 pasos hechos** (M9 y M16 fuera de alcance; ver sección al final).
 
 ---
 
@@ -165,16 +165,20 @@
 - [x] **M10** Productos relacionados. ✅ (`6565fa7`)
   - `ProductDetailVm.Related`; el catálogo trae hasta 4 productos activos de la misma categoría (excluyendo el actual). Sección "Productos relacionados" en el detalle.
 
-### 🟠 Tier 3 — Requieren migración / entidad nueva — PENDIENTE
-- [ ] **M11** Productos destacados con flag `IsFeatured`. ⬜
-  - *(Versión simple ya hecha en `28aa579`: la home toma los más recientes activos vía `CatalogService.GetFeaturedAsync`. Falta el flag `IsFeatured` para elegirlos a mano en el admin.)*
-- [ ] **M12** Banner de promociones (entidad nueva + CRUD admin). ⬜
-- [ ] **M13** Dashboard mejorado (más métricas/gráficos). ⬜
+### 🟠 Tier 3 — Requieren migración / entidad nueva — COMPLETO
+- [x] **M11** Productos destacados con flag `IsFeatured`. ✅ (`3f10a7e`)
+  - `Product.IsFeatured` + migración `AddProductIsFeatured`. Checkbox en el form y botón estrella (toggle) en el listado admin. `GetFeaturedAsync` prioriza destacados y rellena con recientes.
+- [x] **M12** Banner de promociones (entidad + CRUD admin). ✅ (`66adad0`, `aeb7f8e`)
+  - Entidad `Promotion` (imagen, orden, vigencia `DateOnly`) + migración; `IFileStorageService` generalizado (`SaveImageAsync`/`DeleteImage`, `uploads/promotions`). CRUD admin + toggle activar. Sección `#promotions` en la home. **Banners solo visuales** (sin enlace/botón, por decisión del usuario → migración `RemovePromotionLinkFields`).
+- [x] **M13** Dashboard mejorado. ✅ (`27ec6c5`)
+  - Ingresos del mes, ticket promedio, pendientes (realce), clientes, sin stock, promos activas + gráfico de barras CSS de ventas de los últimos 7 días.
 
-### 🔴 Tier 4 — Más complejo (infra externa) — PENDIENTE
-- [ ] **M14** WebP automático (conversión de imágenes al subir). ⬜
-- [ ] **M15** Sitemap.xml dinámico. ⬜ *(el `robots.txt` ya quedó listo esperándolo.)*
-- [ ] **M16** Recuperación de contraseña (requiere SMTP / envío de email). ⬜
+### 🔴 Tier 4 — Más complejo (infra externa)
+- [x] **M14** WebP automático. ✅ (`db35862`)
+  - `SixLabors.ImageSharp` 3.1.11. `SaveImageAsync` convierte toda imagen subida a WebP (calidad 80) y la reduce si supera 1600px. Aplica a productos y promociones.
+- [x] **M15** Sitemap.xml dinámico. ✅ (`7e50b92`)
+  - `SitemapController` genera `/sitemap.xml` (home, tienda, filtros por categoría, detalle de productos con lastmod). `robots.txt` pasa a dinámico (`RobotsController`) para emitir la URL absoluta del sitemap.
+- [~] **M16** Recuperación de contraseña (requiere SMTP). **FUERA DE ALCANCE por ahora (2026-07-08)**: se difiere hasta tener proveedor de email definido.
 
 ---
 
@@ -205,3 +209,5 @@
 | 2026-07-05 | Mejoras v1.0 · M1-M3 | Toasts+Loader (`ui.js`), botón flotante de WhatsApp, lazy loading. Home muestra productos destacados reales (versión simple). |
 | 2026-07-06 | Mejoras v1.0 · M4-M5 | SEO básico (meta/OG/Twitter/robots), optimización móvil + carrito responsive. **Tier 1 cerrado.** |
 | 2026-07-06 | Mejoras v1.0 · M6-M8, M10 | Confirmación de pedido por WhatsApp, "Volver a pedir", búsqueda predictiva, productos relacionados. **M9 (duplicar/toggle) quitado. Tier 2 cerrado.** |
+| 2026-07-08 | Mejoras v1.0 · M11-M13 | Flag `IsFeatured`, banner de promociones (CRUD + solo visuales), dashboard mejorado con gráfico. **Tier 3 cerrado.** (migraciones aplicadas) |
+| 2026-07-08 | Mejoras v1.0 · M14-M15 | WebP automático (ImageSharp), sitemap.xml + robots.txt dinámicos. **M16 (recuperación de contraseña) fuera de alcance hasta tener SMTP.** |

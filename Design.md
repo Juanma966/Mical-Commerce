@@ -221,9 +221,13 @@ Botón con `class="js-add-to-cart"` + `data-product-id` (y opcional `data-produc
 - Botón flotante global: partial `_WhatsAppFloat` (ya está en `_Layout`).
 - Link de un pedido: `WhatsAppHelper.BuildOrderLink(Configuration["Business:WhatsAppNumber"], orderVm)` (devuelve `null` si no hay número → ocultá el botón).
 
-### Imágenes → lazy loading
+### Imágenes → lazy loading + subida
 - Below-the-fold: `loading="lazy" decoding="async"`.
 - Imagen principal / hero (LCP): **no** uses lazy; poné `fetchpriority="high" decoding="async"`.
+- **Subida (admin):** usá `IFileStorageService.SaveImageAsync(file, subfolder)` (ej. `"products"`, `"promotions"`) y `DeleteImage(path)`. Valida tipo/tamaño (≤2 MB), **convierte todo a WebP** (calidad 80, reduce a ≤1600px) y guarda en `wwwroot/uploads/{subfolder}` con nombre GUID. La ruta devuelta siempre termina en `.webp`.
+
+### SEO técnico
+- `/sitemap.xml` y `/robots.txt` se generan dinámicamente (`SitemapController`/`RobotsController`). Si agregás un tipo de página pública nueva, sumala al sitemap en `CatalogService.GetSitemapDataAsync` / `SitemapController`.
 
 ### SEO por vista (vía `ViewData`)
 El `_Layout` arma `<title>`, description, canonical, Open Graph y Twitter Card. Para personalizar una vista:
