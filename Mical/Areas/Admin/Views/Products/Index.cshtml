@@ -76,10 +76,23 @@ else
                             {
                                 <span class="badge bg-secondary">Inactivo</span>
                             }
+                            @if (p.IsFeatured)
+                            {
+                                <span class="badge bg-warning text-dark ms-1" title="Destacado en la home">★ Destacado</span>
+                            }
                         </td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id">Editar</a>
-                            <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@p.Id">Eliminar</a>
+                            <div class="d-inline-flex gap-1">
+                                <form asp-action="ToggleFeatured" asp-route-id="@p.Id" method="post" class="m-0">
+                                    <button type="submit"
+                                            class="btn btn-sm @(p.IsFeatured ? "btn-warning" : "btn-outline-warning")"
+                                            title="@(p.IsFeatured ? "Quitar de destacados" : "Marcar como destacado")">
+                                        @(p.IsFeatured ? "★" : "☆")
+                                    </button>
+                                </form>
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id">Editar</a>
+                                <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@p.Id">Eliminar</a>
+                            </div>
                         </td>
                     </tr>
                 }

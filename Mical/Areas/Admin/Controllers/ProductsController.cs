@@ -86,6 +86,16 @@ public class ProductsController : AdminBaseController
         return View(model);
     }
 
+    // POST: /Admin/Products/ToggleFeatured/5  → destacar/quitar de la home
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleFeatured(int id)
+    {
+        var result = await _products.ToggleFeaturedAsync(id);
+        TempData["StatusMessage"] = result.Succeeded ? "Destacados actualizados." : result.Error;
+        return RedirectToAction(nameof(Index));
+    }
+
     // GET: /Admin/Products/Delete/5
     public async Task<IActionResult> Delete(int id)
     {

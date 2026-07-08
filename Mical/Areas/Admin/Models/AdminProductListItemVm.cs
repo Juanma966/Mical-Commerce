@@ -12,6 +12,7 @@ public class AdminProductListItemVm
     public int Stock { get; set; }
     public int MinStock { get; set; }
     public bool IsActive { get; set; }
+    public bool IsFeatured { get; set; }
     public string? ImagePath { get; set; }
 
     public decimal EffectivePrice => SalePrice ?? Price;

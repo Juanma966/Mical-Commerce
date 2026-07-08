@@ -38,6 +38,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.IsActive)
             .HasDefaultValue(true);
 
+        builder.Property(p => p.IsFeatured)
+            .HasDefaultValue(false);
+
         builder.Property(p => p.IsDeleted)
             .HasDefaultValue(false);
 

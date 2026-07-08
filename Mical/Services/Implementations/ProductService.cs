@@ -40,6 +40,7 @@ public class ProductService : IProductService
                 Stock = p.Stock,
                 MinStock = p.MinStock,
                 IsActive = p.IsActive,
+                IsFeatured = p.IsFeatured,
                 ImagePath = p.ImagePath
             })
             .ToListAsync();
@@ -62,6 +63,7 @@ public class ProductService : IProductService
                 Stock = p.Stock,
                 MinStock = p.MinStock,
                 IsActive = p.IsActive,
+                IsFeatured = p.IsFeatured,
                 ExistingImagePath = p.ImagePath
             })
             .FirstOrDefaultAsync();
@@ -83,6 +85,7 @@ public class ProductService : IProductService
                 Stock = p.Stock,
                 MinStock = p.MinStock,
                 IsActive = p.IsActive,
+                IsFeatured = p.IsFeatured,
                 ImagePath = p.ImagePath
             })
             .FirstOrDefaultAsync();
@@ -113,6 +116,7 @@ public class ProductService : IProductService
             Stock = model.Stock,
             MinStock = model.MinStock,
             IsActive = model.IsActive,
+            IsFeatured = model.IsFeatured,
             ImagePath = imagePath,
             CreatedAt = DateTime.UtcNow
         };
@@ -152,8 +156,21 @@ public class ProductService : IProductService
         product.Stock = model.Stock;
         product.MinStock = model.MinStock;
         product.IsActive = model.IsActive;
+        product.IsFeatured = model.IsFeatured;
         product.UpdatedAt = DateTime.UtcNow;
 
+        await _db.SaveChangesAsync();
+        return OperationResult.Success();
+    }
+
+    public async Task<OperationResult> ToggleFeaturedAsync(int id)
+    {
+        var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
+        if (product is null)
+            return OperationResult.Fail("El producto no existe.");
+
+        product.IsFeatured = !product.IsFeatured;
+        product.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return OperationResult.Success();
     }

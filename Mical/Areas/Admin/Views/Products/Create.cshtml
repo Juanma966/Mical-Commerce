@@ -67,9 +67,15 @@
                 </div>
             </div>
 
-            <div class="form-check mb-4">
+            <div class="form-check mb-2">
                 <input asp-for="IsActive" class="form-check-input" />
                 <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+
+            <div class="form-check mb-4">
+                <input asp-for="IsFeatured" class="form-check-input" />
+                <label asp-for="IsFeatured" class="form-check-label"></label>
+                <div class="form-text">Aparece en la sección "Productos destacados" de la home.</div>
             </div>
 
             <button type="submit" class="btn btn-dark px-4">Crear</button>

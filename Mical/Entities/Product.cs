@@ -34,6 +34,9 @@ public class Product : IAuditable, ISoftDeletable
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>Marca el producto como destacado en la home (se elige a mano en el admin).</summary>
+    public bool IsFeatured { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }

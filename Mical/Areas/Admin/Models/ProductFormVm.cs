@@ -40,6 +40,9 @@ public class ProductFormVm
     [Display(Name = "Activo")]
     public bool IsActive { get; set; } = true;
 
+    [Display(Name = "Destacado en la home")]
+    public bool IsFeatured { get; set; }
+
     [Display(Name = "Imagen")]
     public IFormFile? Image { get; set; }
 

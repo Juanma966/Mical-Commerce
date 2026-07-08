@@ -19,6 +19,9 @@ public interface IProductService
     Task<OperationResult> UpdateAsync(ProductFormVm model);
     Task<OperationResult> DeleteAsync(int id);
 
+    /// <summary>Alterna el estado "destacado" del producto (para la home).</summary>
+    Task<OperationResult> ToggleFeaturedAsync(int id);
+
     /// <summary>Opciones de categorías para el desplegable del formulario.</summary>
     Task<IReadOnlyList<SelectListItem>> GetCategoryOptionsAsync();
 }

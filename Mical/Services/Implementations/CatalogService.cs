@@ -75,9 +75,12 @@ public class CatalogService : ICatalogService
     {
         count = count is < 1 or > 24 ? 8 : count;
 
+        // Prioriza los marcados como destacados; si faltan para llegar a `count`,
+        // rellena con los más recientes.
         return await _db.Products
             .Where(p => p.IsActive && p.Category!.IsActive)
-            .OrderByDescending(p => p.Id)
+            .OrderByDescending(p => p.IsFeatured)
+            .ThenByDescending(p => p.Id)
             .Take(count)
             .Select(p => new ProductCardVm
             {
