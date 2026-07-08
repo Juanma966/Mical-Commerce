@@ -24,7 +24,6 @@
         <div class="row g-3">
             @foreach (var promo in Model.Promotions)
             {
-                var hasLink = !string.IsNullOrWhiteSpace(promo.LinkUrl);
                 <div class="col-12 @(Model.Promotions.Count > 1 ? "col-md-6" : "")">
                     <div class="promo-banner position-relative rounded overflow-hidden h-100">
                         @if (!string.IsNullOrEmpty(promo.ImagePath))
@@ -35,19 +34,9 @@
                             <h3 class="promo-banner__title">@promo.Title</h3>
                             @if (!string.IsNullOrWhiteSpace(promo.Subtitle))
                             {
-                                <p class="promo-banner__subtitle mb-2">@promo.Subtitle</p>
-                            }
-                            @if (hasLink)
-                            {
-                                <a href="@promo.LinkUrl" class="btn btn-light btn-sm fw-semibold" rel="noopener">
-                                    @(string.IsNullOrWhiteSpace(promo.LinkText) ? "Ver más" : promo.LinkText)
-                                </a>
+                                <p class="promo-banner__subtitle mb-0">@promo.Subtitle</p>
                             }
                         </div>
-                        @if (hasLink)
-                        {
-                            <a href="@promo.LinkUrl" class="stretched-link" aria-label="@promo.Title" rel="noopener"></a>
-                        }
                     </div>
                 </div>
             }

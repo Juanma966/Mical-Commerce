@@ -23,12 +23,6 @@ public class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
         builder.Property(p => p.ImagePath)
             .HasMaxLength(255);
 
-        builder.Property(p => p.LinkUrl)
-            .HasMaxLength(300);
-
-        builder.Property(p => p.LinkText)
-            .HasMaxLength(50);
-
         builder.Property(p => p.IsActive)
             .HasDefaultValue(true);
 

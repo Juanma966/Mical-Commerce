@@ -55,8 +55,6 @@ public class PromotionService : IPromotionService
                 Id = p.Id,
                 Title = p.Title,
                 Subtitle = p.Subtitle,
-                LinkUrl = p.LinkUrl,
-                LinkText = p.LinkText,
                 DisplayOrder = p.DisplayOrder,
                 StartsAt = p.StartsAt,
                 EndsAt = p.EndsAt,
@@ -102,8 +100,6 @@ public class PromotionService : IPromotionService
         {
             Title = model.Title.Trim(),
             Subtitle = Clean(model.Subtitle),
-            LinkUrl = Clean(model.LinkUrl),
-            LinkText = Clean(model.LinkText),
             DisplayOrder = model.DisplayOrder,
             StartsAt = model.StartsAt,
             EndsAt = model.EndsAt,
@@ -139,8 +135,6 @@ public class PromotionService : IPromotionService
 
         promo.Title = model.Title.Trim();
         promo.Subtitle = Clean(model.Subtitle);
-        promo.LinkUrl = Clean(model.LinkUrl);
-        promo.LinkText = Clean(model.LinkText);
         promo.DisplayOrder = model.DisplayOrder;
         promo.StartsAt = model.StartsAt;
         promo.EndsAt = model.EndsAt;
@@ -194,9 +188,7 @@ public class PromotionService : IPromotionService
             {
                 Title = p.Title,
                 Subtitle = p.Subtitle,
-                ImagePath = p.ImagePath,
-                LinkUrl = p.LinkUrl,
-                LinkText = p.LinkText
+                ImagePath = p.ImagePath
             })
             .ToListAsync();
     }

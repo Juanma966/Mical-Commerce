@@ -16,15 +16,6 @@ public class PromotionFormVm
     [Display(Name = "Subtítulo")]
     public string? Subtitle { get; set; }
 
-    [StringLength(300, ErrorMessage = "Máximo 300 caracteres.")]
-    [Url(ErrorMessage = "Ingresá una URL válida (ej. https://…).")]
-    [Display(Name = "Enlace (URL)")]
-    public string? LinkUrl { get; set; }
-
-    [StringLength(50, ErrorMessage = "Máximo 50 caracteres.")]
-    [Display(Name = "Texto del botón")]
-    public string? LinkText { get; set; }
-
     [Display(Name = "Orden")]
     public int DisplayOrder { get; set; }
 

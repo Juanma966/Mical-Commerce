@@ -17,12 +17,6 @@ public class Promotion : IAuditable, ISoftDeletable
     /// <summary>Ruta relativa de la imagen en wwwroot/uploads/promotions.</summary>
     public string? ImagePath { get; set; }
 
-    /// <summary>URL de destino al hacer click (opcional).</summary>
-    public string? LinkUrl { get; set; }
-
-    /// <summary>Texto del botón (opcional; por defecto "Ver más").</summary>
-    public string? LinkText { get; set; }
-
     public bool IsActive { get; set; } = true;
 
     /// <summary>Orden de aparición (menor primero).</summary>

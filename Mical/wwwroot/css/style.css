@@ -1409,11 +1409,6 @@ figure.instagram-item img.insta-image {
     font-size: .95rem;
     opacity: .95;
 }
-/* El botón debe quedar por encima del stretched-link para ser clickeable. */
-.promo-banner__body .btn {
-    position: relative;
-    z-index: 2;
-}
 
 /* 17. Ajustes táctiles/móvil generales
 --------------------------------------------------------------*/
