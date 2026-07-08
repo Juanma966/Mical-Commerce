@@ -1,37 +1,104 @@
 @model DashboardVm
 @{
     ViewData["Title"] = "Dashboard";
+    var maxSales = Model.SalesLast7Days.Count > 0 ? Model.SalesLast7Days.Max(d => d.Total) : 0m;
+    string[] dayNames = { "Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá" };
 }
 
 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
     <h1 class="h3 mb-0">Panel de administración</h1>
 </div>
 
-<!-- Tarjetas resumen -->
-<div class="row g-3 mb-4">
+<!-- KPIs principales -->
+<div class="row g-3 mb-3">
     <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100"><div class="card-body">
-            <p class="text-muted small text-uppercase mb-1">Ingresos</p>
+            <p class="text-muted small text-uppercase mb-1">Ingresos (histórico)</p>
             <p class="h4 mb-0">@Model.Revenue.ToMoney()</p>
         </div></div>
     </div>
     <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small text-uppercase mb-1">Ingresos del mes</p>
+            <p class="h4 mb-0">@Model.RevenueThisMonth.ToMoney()</p>
+            <p class="text-muted small mb-0">@Model.OrdersThisMonth pedido(s) este mes</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <p class="text-muted small text-uppercase mb-1">Ticket promedio</p>
+            <p class="h4 mb-0">@Model.AverageOrderValue.ToMoney()</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100 @(Model.PendingOrders > 0 ? "border-start border-4 border-warning" : "")"><div class="card-body">
+            <p class="text-muted small text-uppercase mb-1">Pedidos pendientes</p>
+            <p class="h4 mb-0">@Model.PendingOrders</p>
+            @if (Model.PendingOrders > 0)
+            {
+                <a asp-controller="Orders" asp-action="Index" class="small text-decoration-none">Ver pedidos →</a>
+            }
+        </div></div>
+    </div>
+</div>
+
+<!-- Métricas secundarias -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
             <p class="text-muted small text-uppercase mb-1">Pedidos</p>
-            <p class="h4 mb-0">@Model.TotalOrders</p>
+            <p class="h5 mb-0">@Model.TotalOrders</p>
         </div></div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+            <p class="text-muted small text-uppercase mb-1">Clientes</p>
+            <p class="h5 mb-0">@Model.TotalCustomers</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
             <p class="text-muted small text-uppercase mb-1">Productos</p>
-            <p class="h4 mb-0">@Model.TotalProducts</p>
+            <p class="h5 mb-0">@Model.TotalProducts</p>
         </div></div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="card border-0 shadow-sm h-100"><div class="card-body">
-            <p class="text-muted small text-uppercase mb-1">Categorías</p>
-            <p class="h4 mb-0">@Model.TotalCategories</p>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card border-0 shadow-sm h-100 @(Model.OutOfStockCount > 0 ? "border-start border-4 border-danger" : "")"><div class="card-body py-3">
+            <p class="text-muted small text-uppercase mb-1">Sin stock</p>
+            <p class="h5 mb-0">@Model.OutOfStockCount</p>
         </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+            <p class="text-muted small text-uppercase mb-1">Categorías</p>
+            <p class="h5 mb-0">@Model.TotalCategories</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+            <p class="text-muted small text-uppercase mb-1">Promos activas</p>
+            <p class="h5 mb-0">@Model.ActivePromotions</p>
+        </div></div>
+    </div>
+</div>
+
+<!-- Ventas últimos 7 días -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h6 class="text-uppercase text-muted mb-3">Ventas de los últimos 7 días</h6>
+        <div class="sales-chart">
+            @foreach (var d in Model.SalesLast7Days)
+            {
+                var pct = maxSales > 0 ? (double)(d.Total / maxSales) * 100 : 0;
+                <div class="sales-chart__col" title="@d.Date.ToString("dd/MM/yyyy"): @d.Total.ToMoney()">
+                    <div class="sales-chart__bar-wrap">
+                        <span class="sales-chart__value">@(d.Total > 0 ? d.Total.ToMoney() : "")</span>
+                        <div class="sales-chart__bar" style="height:@pct.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                    <span class="sales-chart__label">@dayNames[(int)d.Date.DayOfWeek]<br>@d.Date.ToString("dd/MM")</span>
+                </div>
+            }
+        </div>
     </div>
 </div>
 
@@ -130,3 +197,53 @@
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        .sales-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: .5rem;
+            height: 180px;
+        }
+        .sales-chart__col {
+            flex: 1 1 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+        .sales-chart__bar-wrap {
+            flex: 1 1 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .sales-chart__bar {
+            width: 60%;
+            max-width: 46px;
+            min-height: 3px;
+            background: #7E5FA4;
+            border-radius: 6px 6px 0 0;
+            transition: height .3s ease;
+        }
+        .sales-chart__col:hover .sales-chart__bar {
+            background: #6a4f8c;
+        }
+        .sales-chart__value {
+            font-size: .7rem;
+            color: #555;
+            margin-bottom: 3px;
+            white-space: nowrap;
+        }
+        .sales-chart__label {
+            margin-top: .4rem;
+            font-size: .72rem;
+            color: #777;
+            text-align: center;
+            line-height: 1.15;
+        }
+    </style>
+}
