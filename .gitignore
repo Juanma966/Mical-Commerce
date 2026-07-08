@@ -487,6 +487,8 @@ $RECYCLE.BIN/
 # Imágenes subidas por usuarios (no versionar el contenido, sí la carpeta)
 Mical/wwwroot/uploads/products/*
 !Mical/wwwroot/uploads/products/.gitkeep
+Mical/wwwroot/uploads/promotions/*
+!Mical/wwwroot/uploads/promotions/.gitkeep
 
 # Secretos y configuración local de producción
 # appsettings.Production.json SÍ se versiona (no contiene secretos: la connection

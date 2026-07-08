@@ -31,8 +31,13 @@ public static class ServiceCollectionExtensions
     {
         services.AddResend(options =>
         {
-            // La API key se resuelve desde user-secrets (dev) o variables de entorno (prod).
-            options.ApiToken = configuration["Resend:ApiToken"] ?? string.Empty;
+            // La API key se resuelve desde:
+            //  - producción: variable de entorno RESEND_API_KEY
+            //  - desarrollo: user-secrets Resend:ApiToken
+            // Nunca se hardcodea.
+            options.ApiToken = configuration["RESEND_API_KEY"]
+                ?? configuration["Resend:ApiToken"]
+                ?? string.Empty;
             // Con esto, un fallo del proveedor lanza excepción (lo capturamos y logueamos).
             options.ThrowExceptions = true;
         });

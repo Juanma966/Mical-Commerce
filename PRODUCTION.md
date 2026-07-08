@@ -12,6 +12,7 @@ En producción, estos valores se pasan por **variables de entorno** (no van en
 |---|---|
 | `ConnectionStrings__DefaultConnection` | Cadena de conexión a PostgreSQL. |
 | `AdminSeed__Password` | Contraseña del admin inicial (el seeder lo crea al arrancar). |
+| `RESEND_API_KEY` | API key de Resend para el envío de emails (recuperación de contraseña). |
 | `ASPNETCORE_ENVIRONMENT` | `Production`. |
 
 > Autenticación **solo por ASP.NET Identity** (email + contraseña). No hay login
@@ -38,7 +39,29 @@ niveles de log y `AdminSeed:Email`/`FullName`. Ajustá `AllowedHosts` al dominio
   del proxy (en `Program.cs`) para que no se puedan falsificar las cabeceras.
 - Terminar TLS en el proxy o en Kestrel con un certificado válido (no el de dev).
 
-## 4. Seguridad ya incluida en el código
+## 4. Email (Resend)
+
+El envío de emails (recuperación de contraseña) usa **Resend**, detrás de la
+abstracción `IEmailService` (se puede cambiar de proveedor sin tocar el resto).
+
+1. **API key**: en producción, por variable de entorno `RESEND_API_KEY` (en dev,
+   user-secrets `Resend:ApiToken`). Nunca en el repo. Conviene una key propia de prod.
+2. **Dominio verificado**: en el panel de Resend → *Domains*, agregá tu dominio y
+   cargá los registros DNS (SPF/DKIM/DMARC). Hasta verificarlo, con el remitente de
+   prueba `onboarding@resend.dev` **solo se entrega al email de la cuenta de Resend**.
+3. **Remitente**: una vez verificado el dominio, cambiá `Resend:From` en
+   `appsettings.json` a una dirección **de ese dominio**:
+   ```json
+   "Resend": { "From": "Mical <no-responder@tudominio.com>" }
+   ```
+4. **URL del enlace de reset**: se arma sola con el host real del request
+   (`Request.Scheme`/`Host`), así que respeta el dominio de producción siempre que
+   el proxy inverso pase bien los forwarded headers (ver §3).
+
+> El número de WhatsApp del botón flotante y de la confirmación de pedidos está en
+> `Business:WhatsAppNumber` (`appsettings.json`, no sensible). Ajustalo al real.
+
+## 5. Seguridad ya incluida en el código
 
 - **Autenticación**: cookies `HttpOnly` + `Secure` + `SameSite=Lax`.
 - **Autorización**: `/Admin` exige rol Administrador (política `AdminOnly`).
@@ -53,7 +76,7 @@ niveles de log y `AdminSeed:Email`/`FullName`. Ajustá `AllowedHosts` al dominio
 - **Errores**: página amigable `/Home/Error` (sin stack traces al usuario).
 - **Auditoría**: interceptor de `SaveChanges` registra acciones de admin en `AuditLogs`.
 
-## 5. Antes de publicar
+## 6. Antes de publicar
 
 - [ ] `ASPNETCORE_ENVIRONMENT=Production` y secretos por variables de entorno.
 - [ ] `AllowedHosts` = dominio real.
@@ -61,17 +84,24 @@ niveles de log y `AdminSeed:Email`/`FullName`. Ajustá `AllowedHosts` al dominio
 - [ ] Cambiar la contraseña del admin inicial tras el primer login.
 - [ ] Certificado TLS válido; HTTP redirige a HTTPS.
 - [ ] `KnownProxies` del proxy inverso configurados.
-- [ ] Backups de la base y de `wwwroot/uploads/products`.
+- [ ] `RESEND_API_KEY` seteada, dominio verificado en Resend y `Resend:From` con una dirección del dominio.
+- [ ] `Business:WhatsAppNumber` con el número real.
+- [ ] Backups de la base y de `wwwroot/uploads/` (products y promotions).
 - [ ] Revisar logs (`logs/`) y rotación.
+- [ ] Verificar `/sitemap.xml` y `/robots.txt` responden con el dominio real.
 
-## 6. Pruebas de humo (flujo completo)
+## 7. Pruebas de humo (flujo completo)
 
-1. Home y `/shop` cargan; búsqueda y filtro por categoría funcionan.
+1. Home y `/shop` cargan; búsqueda predictiva y filtro por categoría funcionan.
 2. Registro de un usuario nuevo → login.
 3. Agregar al carrito → `/cart` refleja precio y stock del servidor.
-4. Checkout autenticado → se crea el pedido, descuenta stock, muestra confirmación.
-5. `/order` (Mis pedidos) muestra el pedido; el detalle es solo del dueño.
-6. Admin: crear categoría y producto (con imagen), cambiar estado de un pedido,
-   cancelar y verificar reposición de stock (salvo Entregado).
-7. Dashboard muestra métricas; `AuditLogs` registra las acciones de admin.
+4. Checkout autenticado → se crea el pedido, descuenta stock, muestra confirmación
+   (y el botón de confirmación por WhatsApp).
+5. `/order` (Mis pedidos) muestra el pedido; el detalle es solo del dueño; "Volver a pedir" funciona.
+6. Admin: crear categoría y producto (con imagen → se guarda como WebP), destacar un
+   producto, crear una promoción, cambiar estado de un pedido, cancelar y verificar
+   reposición de stock (salvo Entregado).
+7. Dashboard muestra métricas y el gráfico; `AuditLogs` registra las acciones de admin.
 8. Rate limiting: muchos intentos de login seguidos → 429.
+9. Recuperación de contraseña: *olvidé mi contraseña* → llega el email → el enlace
+   abre el reset → nueva contraseña → login con la nueva.
