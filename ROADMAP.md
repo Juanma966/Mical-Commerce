@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-08 — Fases 0-8 cerradas. **Mejoras v1.0: 14 de 16 pasos hechos** (M9 y M16 fuera de alcance; ver sección al final).
+**Última actualización:** 2026-07-08 — Fases 0-8 cerradas. **Mejoras v1.0: 15 de 16 pasos hechos** (M9 fuera de alcance; ver sección al final).
 
 ---
 
@@ -178,7 +178,8 @@
   - `SixLabors.ImageSharp` 3.1.11. `SaveImageAsync` convierte toda imagen subida a WebP (calidad 80) y la reduce si supera 1600px. Aplica a productos y promociones.
 - [x] **M15** Sitemap.xml dinámico. ✅ (`7e50b92`)
   - `SitemapController` genera `/sitemap.xml` (home, tienda, filtros por categoría, detalle de productos con lastmod). `robots.txt` pasa a dinámico (`RobotsController`) para emitir la URL absoluta del sitemap.
-- [~] **M16** Recuperación de contraseña (requiere SMTP). **FUERA DE ALCANCE por ahora (2026-07-08)**: se difiere hasta tener proveedor de email definido.
+- [x] **M16** Recuperación de contraseña por email. ✅ (`4ae8f4b`)
+  - `IEmailService` (abstracción) + `ResendEmailService` (SDK oficial Resend); `IEmailTemplateRenderer` + `EmailTemplates/ForgotPassword.html` (placeholders `{{Name}}`/`{{ResetUrl}}`). Flujo `ForgotPassword`/`ResetPassword` con token de Identity, anti-enumeración y rate limit. API key en `Resend:ApiToken` (user-secrets/env). Logging Serilog sin exponer la key.
 
 ---
 
@@ -210,4 +211,5 @@
 | 2026-07-06 | Mejoras v1.0 · M4-M5 | SEO básico (meta/OG/Twitter/robots), optimización móvil + carrito responsive. **Tier 1 cerrado.** |
 | 2026-07-06 | Mejoras v1.0 · M6-M8, M10 | Confirmación de pedido por WhatsApp, "Volver a pedir", búsqueda predictiva, productos relacionados. **M9 (duplicar/toggle) quitado. Tier 2 cerrado.** |
 | 2026-07-08 | Mejoras v1.0 · M11-M13 | Flag `IsFeatured`, banner de promociones (CRUD + solo visuales), dashboard mejorado con gráfico. **Tier 3 cerrado.** (migraciones aplicadas) |
-| 2026-07-08 | Mejoras v1.0 · M14-M15 | WebP automático (ImageSharp), sitemap.xml + robots.txt dinámicos. **M16 (recuperación de contraseña) fuera de alcance hasta tener SMTP.** |
+| 2026-07-08 | Mejoras v1.0 · M14-M15 | WebP automático (ImageSharp), sitemap.xml + robots.txt dinámicos. |
+| 2026-07-08 | Mejoras v1.0 · M16 | Recuperación de contraseña por email con Resend (abstracción `IEmailService`, plantilla HTML, flujo Forgot/Reset con token de Identity). Requiere `Resend:ApiToken` en user-secrets. **Solo M9 queda fuera de alcance.** |
