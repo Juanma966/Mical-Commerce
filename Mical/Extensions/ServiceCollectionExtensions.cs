@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mical.Services.Implementations;
 using Mical.Services.Interfaces;
+using Resend;
 
 namespace Mical.Extensions;
 
@@ -18,6 +19,26 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ISkuGenerator, SkuGenerator>();
         services.AddScoped<IFileStorageService, FileStorageService>();
+        return services;
+    }
+
+    /// <summary>
+    /// Registra el envío de emails: el cliente de Resend (API key desde configuración,
+    /// nunca hardcodeada) detrás de la abstracción <see cref="IEmailService"/>, más el
+    /// renderizador de plantillas HTML.
+    /// </summary>
+    public static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddResend(options =>
+        {
+            // La API key se resuelve desde user-secrets (dev) o variables de entorno (prod).
+            options.ApiToken = configuration["Resend:ApiToken"] ?? string.Empty;
+            // Con esto, un fallo del proveedor lanza excepción (lo capturamos y logueamos).
+            options.ThrowExceptions = true;
+        });
+
+        services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
+        services.AddScoped<IEmailService, ResendEmailService>();
         return services;
     }
 

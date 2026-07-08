@@ -1,30 +1,39 @@
+using System.Text;
 using Mical.Entities;
 using Mical.Helpers;
+using Mical.Services.Interfaces;
 using Mical.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Mical.Controllers;
 
 /// <summary>
-/// Registro, inicio/cierre de sesión, perfil y cambio de contraseña.
+/// Registro, inicio/cierre de sesión, perfil, cambio y recuperación de contraseña.
 /// Autenticación por cookies de ASP.NET Identity (sin JWT).
 /// </summary>
 public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IEmailService _email;
+    private readonly IEmailTemplateRenderer _templates;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
+        IEmailService email,
+        IEmailTemplateRenderer templates,
         ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _email = email;
+        _templates = templates;
         _logger = logger;
     }
 
@@ -222,6 +231,101 @@ public class AccountController : Controller
         return View(model);
     }
 
+    // ---------- Recuperación de contraseña ----------
+
+    [HttpGet]
+    public IActionResult ForgotPassword() => View(new ForgotPasswordVm());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordVm model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is not null)
+        {
+            try
+            {
+                // 1) Identity genera el token; se codifica para viajar en la URL.
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+                // 2) URL absoluta de recuperación.
+                var resetUrl = Url.Action(
+                    nameof(ResetPassword), "Account",
+                    new { email = user.Email, token = encodedToken },
+                    Request.Scheme)!;
+
+                // 3) Se renderiza la plantilla y 4) se reemplazan los placeholders.
+                var html = await _templates.RenderAsync("ForgotPassword", new Dictionary<string, string>
+                {
+                    ["Name"] = user.FullName ?? "Hola",
+                    ["ResetUrl"] = resetUrl
+                });
+
+                // 5) Envío desacoplado del proveedor.
+                await _email.SendEmailAsync(user.Email!, "Recuperá tu contraseña - Mical", html);
+                _logger.LogInformation("Email de recuperación solicitado para {Email}.", user.Email);
+            }
+            catch (Exception ex)
+            {
+                // No exponemos el fallo al usuario (anti-enumeración); queda en el log.
+                _logger.LogError(ex, "No se pudo enviar el email de recuperación a {Email}.", user.Email);
+            }
+        }
+
+        // Mensaje genérico siempre: no revelar si el email existe.
+        return RedirectToAction(nameof(ForgotPasswordConfirmation));
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPasswordConfirmation() => View();
+
+    [HttpGet]
+    public IActionResult ResetPassword(string? email = null, string? token = null)
+    {
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+            return RedirectToAction(nameof(Login));
+
+        return View(new ResetPasswordVm { Email = email, Token = token });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public async Task<IActionResult> ResetPassword(ResetPasswordVm model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null)
+        {
+            // Mismo resultado que un token inválido: no revelamos si el email existe.
+            TempData["StatusMessage"] = "Tu contraseña fue restablecida. Ya podés iniciar sesión.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        // Identity valida el token (previa decodificación).
+        var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
+        var result = await _userManager.ResetPasswordAsync(user, decodedToken, model.Password);
+
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("Contraseña restablecida para {Email}.", user.Email);
+            TempData["StatusMessage"] = "Tu contraseña fue restablecida. Ya podés iniciar sesión.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        foreach (var error in result.Errors)
+            ModelState.AddModelError(string.Empty, Translate(error));
+
+        return View(model);
+    }
+
     // ---------- Acceso denegado ----------
 
     [HttpGet]
@@ -246,6 +350,7 @@ public class AccountController : Controller
         "PasswordRequiresLower" => "La contraseña debe incluir al menos una minúscula.",
         "PasswordRequiresUpper" => "La contraseña debe incluir al menos una mayúscula.",
         "PasswordMismatch" => "La contraseña actual es incorrecta.",
+        "InvalidToken" => "El enlace de recuperación no es válido o expiró. Pedí uno nuevo.",
         _ => error.Description
     };
 }

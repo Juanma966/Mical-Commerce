@@ -37,6 +37,7 @@ try
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddApplicationServices();
     builder.Services.AddApplicationValidation();
+    builder.Services.AddEmailServices(builder.Configuration);
 
     // Rate limiting: limita los intentos en los endpoints de autenticación
     // (login/registro) por IP, para frenar fuerza bruta y abuso automatizado.
