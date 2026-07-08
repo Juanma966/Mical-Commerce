@@ -1,0 +1,26 @@
+@model AdminPromotionListItemVm
+@{
+    ViewData["Title"] = "Eliminar promoción";
+}
+
+<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h1 class="h3 mb-0">Eliminar promoción</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index">Volver</a>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width:560px;">
+    <div class="card-body p-4">
+        <p>¿Seguro que querés eliminar esta promoción?</p>
+
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <img src="~/@Model.ImagePath" alt="@Model.Title" height="60" style="object-fit:cover;border-radius:6px;" class="mb-3" loading="lazy" decoding="async" />
+        }
+        <p class="mb-4"><strong>@Model.Title</strong></p>
+
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="m-0">
+            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
+        </form>
+    </div>
+</div>

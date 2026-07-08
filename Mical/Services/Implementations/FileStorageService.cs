@@ -7,7 +7,8 @@ public class FileStorageService : IFileStorageService
     private const long MaxBytes = 2 * 1024 * 1024; // 2 MB
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
     private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/png", "image/webp" };
-    private const string ProductsFolder = "uploads/products";
+    private const string UploadsRoot = "uploads";
+    private const string ProductsFolder = "products";
 
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<FileStorageService> _logger;
@@ -18,7 +19,12 @@ public class FileStorageService : IFileStorageService
         _logger = logger;
     }
 
-    public async Task<FileSaveResult> SaveProductImageAsync(IFormFile file)
+    public Task<FileSaveResult> SaveProductImageAsync(IFormFile file) =>
+        SaveImageAsync(file, ProductsFolder);
+
+    public void DeleteProductImage(string? relativePath) => DeleteImage(relativePath);
+
+    public async Task<FileSaveResult> SaveImageAsync(IFormFile file, string subfolder)
     {
         if (file is null || file.Length == 0)
             return FileSaveResult.Fail("El archivo está vacío.");
@@ -33,7 +39,10 @@ public class FileStorageService : IFileStorageService
         if (!AllowedContentTypes.Contains(file.ContentType))
             return FileSaveResult.Fail("El contenido del archivo no es una imagen válida.");
 
-        var folderAbsolute = Path.Combine(_env.WebRootPath, "uploads", "products");
+        // Normaliza la subcarpeta (evita rutas fuera de uploads/).
+        subfolder = string.IsNullOrWhiteSpace(subfolder) ? "misc" : Path.GetFileName(subfolder);
+
+        var folderAbsolute = Path.Combine(_env.WebRootPath, UploadsRoot, subfolder);
         Directory.CreateDirectory(folderAbsolute);
 
         // Nombre regenerado con GUID: evita colisiones y nombres maliciosos.
@@ -45,18 +54,18 @@ public class FileStorageService : IFileStorageService
             await file.CopyToAsync(stream);
         }
 
-        var relativePath = $"{ProductsFolder}/{fileName}";
-        _logger.LogInformation("Imagen de producto guardada: {Path}", relativePath);
+        var relativePath = $"{UploadsRoot}/{subfolder}/{fileName}";
+        _logger.LogInformation("Imagen guardada: {Path}", relativePath);
         return FileSaveResult.Success(relativePath);
     }
 
-    public void DeleteProductImage(string? relativePath)
+    public void DeleteImage(string? relativePath)
     {
         if (string.IsNullOrWhiteSpace(relativePath))
             return;
 
-        // Solo se permite borrar dentro de uploads/products (defensa ante rutas raras).
-        if (!relativePath.Replace('\\', '/').StartsWith(ProductsFolder, StringComparison.OrdinalIgnoreCase))
+        // Solo se permite borrar dentro de uploads/ (defensa ante rutas raras).
+        if (!relativePath.Replace('\\', '/').StartsWith(UploadsRoot + "/", StringComparison.OrdinalIgnoreCase))
             return;
 
         var absolutePath = Path.Combine(_env.WebRootPath, relativePath.Replace('/', Path.DirectorySeparatorChar));

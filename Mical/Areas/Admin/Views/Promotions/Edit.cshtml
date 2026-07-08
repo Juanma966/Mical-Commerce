@@ -1,0 +1,87 @@
+@model PromotionFormVm
+@{
+    ViewData["Title"] = "Editar promoción";
+}
+
+<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+    <h1 class="h3 mb-0">Editar promoción</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index">Volver</a>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width:760px;">
+    <div class="card-body p-4">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ExistingImagePath" />
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Subtitle" class="form-label"></label>
+                <input asp-for="Subtitle" class="form-control" />
+                <span asp-validation-for="Subtitle" class="text-danger small"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label asp-for="LinkUrl" class="form-label"></label>
+                    <input asp-for="LinkUrl" class="form-control" placeholder="https://…" />
+                    <div class="form-text">A dónde lleva el banner al hacer click (opcional).</div>
+                    <span asp-validation-for="LinkUrl" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="LinkText" class="form-label"></label>
+                    <input asp-for="LinkText" class="form-control" placeholder="Ver más" />
+                    <span asp-validation-for="LinkText" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Image" class="form-label"></label>
+                @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+                {
+                    <div class="mb-2">
+                        <img src="~/@Model.ExistingImagePath" alt="Imagen actual" height="60" style="object-fit:cover;border-radius:6px;" loading="lazy" decoding="async" />
+                    </div>
+                }
+                <input asp-for="Image" type="file" accept="image/*" class="form-control" />
+                <div class="form-text">Subí una nueva solo si querés reemplazarla. JPG, PNG o WEBP. Máx. 2 MB.</div>
+                <span asp-validation-for="Image" class="text-danger small"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="DisplayOrder" class="form-label"></label>
+                    <input asp-for="DisplayOrder" type="number" min="0" class="form-control" />
+                    <span asp-validation-for="DisplayOrder" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="StartsAt" class="form-label"></label>
+                    <input asp-for="StartsAt" type="date" class="form-control" />
+                    <span asp-validation-for="StartsAt" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="EndsAt" class="form-label"></label>
+                    <input asp-for="EndsAt" type="date" class="form-control" />
+                    <span asp-validation-for="EndsAt" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="form-check mb-4">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-dark px-4">Guardar cambios</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

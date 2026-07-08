@@ -1369,6 +1369,52 @@ figure.instagram-item img.insta-image {
     background: #f2ecf7;
 }
 
+/* 19. Banner de promociones (home)
+--------------------------------------------------------------*/
+.promo-banner {
+    min-height: 160px;
+    display: flex;
+    background: var(--primary-color);
+    color: #fff;
+}
+.promo-banner__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.promo-banner__body {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    color: #fff;
+    /* Degradado para que el texto sea legible sobre la imagen. */
+    background: linear-gradient(to top, rgba(0, 0, 0, .6), rgba(0, 0, 0, 0));
+}
+.promo-banner__body--solid {
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: transparent;
+}
+.promo-banner__title {
+    font-size: 1.25rem;
+    margin-bottom: .15rem;
+}
+.promo-banner__subtitle {
+    font-size: .95rem;
+    opacity: .95;
+}
+/* El botón debe quedar por encima del stretched-link para ser clickeable. */
+.promo-banner__body .btn {
+    position: relative;
+    z-index: 2;
+}
+
 /* 17. Ajustes táctiles/móvil generales
 --------------------------------------------------------------*/
 @media (max-width: 575.98px) {

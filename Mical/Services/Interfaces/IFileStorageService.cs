@@ -26,4 +26,13 @@ public interface IFileStorageService
 
     /// <summary>Elimina la imagen indicada por su ruta relativa (si existe).</summary>
     void DeleteProductImage(string? relativePath);
+
+    /// <summary>
+    /// Guarda una imagen validada en <c>wwwroot/uploads/{subfolder}</c> con nombre
+    /// regenerado (GUID). Usar subcarpetas simples (ej. "promotions").
+    /// </summary>
+    Task<FileSaveResult> SaveImageAsync(IFormFile file, string subfolder);
+
+    /// <summary>Elimina una imagen dentro de <c>wwwroot/uploads/</c> (si existe).</summary>
+    void DeleteImage(string? relativePath);
 }

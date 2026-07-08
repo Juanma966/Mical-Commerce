@@ -1,11 +1,11 @@
-@model IReadOnlyList<ProductCardVm>
+@model HomeIndexVm
 @{
     ViewData["Title"] = "Inicio";
     ViewData["Description"] = "Mical — Librería y Regalería Cristiana. Biblias, libros, regalos y artículos de imprenta con diseño. Comprá online con envíos a todo el país.";
 }
 
 @*
-    Home pública. Los "productos destacados" ahora salen de la base (catálogo real).
+    Home pública. Promociones y "productos destacados" salen de la base (admin/catálogo).
     El resto de secciones (blog, instagram) sigue con datos de muestra del maquetado.
 *@
 
@@ -17,6 +17,43 @@
         <a asp-controller="Shop" asp-action="Index" class="btn btn-medium btn-dark text-uppercase btn-rounded-none">Ver productos</a>
     </div>
 </section>
+
+@if (Model.Promotions.Any())
+{
+    <section id="promotions" class="container my-4">
+        <div class="row g-3">
+            @foreach (var promo in Model.Promotions)
+            {
+                var hasLink = !string.IsNullOrWhiteSpace(promo.LinkUrl);
+                <div class="col-12 @(Model.Promotions.Count > 1 ? "col-md-6" : "")">
+                    <div class="promo-banner position-relative rounded overflow-hidden h-100">
+                        @if (!string.IsNullOrEmpty(promo.ImagePath))
+                        {
+                            <img src="~/@promo.ImagePath" alt="@promo.Title" class="promo-banner__img" loading="lazy" decoding="async" />
+                        }
+                        <div class="promo-banner__body @(string.IsNullOrEmpty(promo.ImagePath) ? "promo-banner__body--solid" : "")">
+                            <h3 class="promo-banner__title">@promo.Title</h3>
+                            @if (!string.IsNullOrWhiteSpace(promo.Subtitle))
+                            {
+                                <p class="promo-banner__subtitle mb-2">@promo.Subtitle</p>
+                            }
+                            @if (hasLink)
+                            {
+                                <a href="@promo.LinkUrl" class="btn btn-light btn-sm fw-semibold" rel="noopener">
+                                    @(string.IsNullOrWhiteSpace(promo.LinkText) ? "Ver más" : promo.LinkText)
+                                </a>
+                            }
+                        </div>
+                        @if (hasLink)
+                        {
+                            <a href="@promo.LinkUrl" class="stretched-link" aria-label="@promo.Title" rel="noopener"></a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
 
 <section id="company-services" class="padding-large">
     <div class="container">
@@ -69,7 +106,7 @@
     </div>
 </section>
 
-@if (Model.Any())
+@if (Model.Featured.Any())
 {
     <section id="mobile-products" class="product-store position-relative padding-large no-padding-top">
         <div class="container">
@@ -82,7 +119,7 @@
                 </div>
                 <div class="swiper product-swiper">
                     <div class="swiper-wrapper">
-                        @foreach (var item in Model)
+                        @foreach (var item in Model.Featured)
                         {
                             <div class="swiper-slide">
                                 <div class="product-card position-relative">

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Mical.Models;
 using Mical.Services.Interfaces;
+using Mical.ViewModels;
 
 namespace Mical.Controllers;
 
@@ -9,17 +10,23 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly ICatalogService _catalog;
+    private readonly IPromotionService _promotions;
 
-    public HomeController(ILogger<HomeController> logger, ICatalogService catalog)
+    public HomeController(ILogger<HomeController> logger, ICatalogService catalog, IPromotionService promotions)
     {
         _logger = logger;
         _catalog = catalog;
+        _promotions = promotions;
     }
 
     public async Task<IActionResult> Index()
     {
-        var featured = await _catalog.GetFeaturedAsync(8);
-        return View(featured);
+        var model = new HomeIndexVm
+        {
+            Promotions = await _promotions.GetActiveBannersAsync(),
+            Featured = await _catalog.GetFeaturedAsync(8)
+        };
+        return View(model);
     }
 
     public IActionResult Privacy()
