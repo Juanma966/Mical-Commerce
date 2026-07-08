@@ -1,4 +1,7 @@
 using Mical.Services.Interfaces;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
 
 namespace Mical.Services.Implementations;
 
@@ -9,6 +12,9 @@ public class FileStorageService : IFileStorageService
     private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/png", "image/webp" };
     private const string UploadsRoot = "uploads";
     private const string ProductsFolder = "products";
+    // Toda imagen se guarda como WebP; se reduce si excede este ancho.
+    private const int MaxWidth = 1600;
+    private const int WebpQuality = 80;
 
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<FileStorageService> _logger;
@@ -46,16 +52,30 @@ public class FileStorageService : IFileStorageService
         Directory.CreateDirectory(folderAbsolute);
 
         // Nombre regenerado con GUID: evita colisiones y nombres maliciosos.
-        var fileName = $"{Guid.NewGuid():N}{ext}";
+        // Toda imagen se persiste como WebP (mejor compresión).
+        var fileName = $"{Guid.NewGuid():N}.webp";
         var absolutePath = Path.Combine(folderAbsolute, fileName);
 
-        await using (var stream = new FileStream(absolutePath, FileMode.Create))
+        try
         {
-            await file.CopyToAsync(stream);
+            await using var input = file.OpenReadStream();
+            using var image = await Image.LoadAsync(input);
+
+            // Reduce solo si supera el ancho máximo (nunca agranda).
+            if (image.Width > MaxWidth)
+                image.Mutate(x => x.Resize(MaxWidth, 0));
+
+            await image.SaveAsWebpAsync(absolutePath, new WebpEncoder { Quality = WebpQuality });
+        }
+        catch (Exception ex) when (ex is not IOException)
+        {
+            // Si el contenido no es una imagen decodificable pese al content-type.
+            _logger.LogWarning(ex, "No se pudo procesar la imagen subida.");
+            return FileSaveResult.Fail("No pudimos procesar la imagen. Probá con otro archivo.");
         }
 
         var relativePath = $"{UploadsRoot}/{subfolder}/{fileName}";
-        _logger.LogInformation("Imagen guardada: {Path}", relativePath);
+        _logger.LogInformation("Imagen guardada como WebP: {Path}", relativePath);
         return FileSaveResult.Success(relativePath);
     }
 
