@@ -1,6 +1,7 @@
 @*
     Encabezado del sitio público: popup de búsqueda + navbar.
-    Los enlaces a secciones futuras (shop, cart, etc.) apuntan a "#" hasta que existan esas fases.
+    Los íconos de cuenta/carrito viven FUERA del offcanvas para estar siempre
+    visibles (también en mobile); el offcanvas solo contiene los links del menú.
 *@
 <div class="search-popup">
     <div class="search-popup-container">
@@ -26,78 +27,85 @@
             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                 <img src="~/images/mical-logo.webp" class="logo" alt="Mical — Librería y Regalería Cristiana">
             </a>
-            <button class="navbar-toggler d-flex d-lg-none order-3 p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#bdNavbar" aria-controls="bdNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <svg class="navbar-icon">
-                    <use xlink:href="#navbar-icon"></use>
-                </svg>
-            </button>
-            <div class="offcanvas offcanvas-end" tabindex="-1" id="bdNavbar" aria-labelledby="bdNavbarOffcanvasLabel">
+
+            <!-- Íconos siempre visibles (buscar, cuenta, carrito) + hamburguesa -->
+            <div class="header-actions d-flex align-items-center ms-auto order-lg-last">
+                <ul class="user-items d-flex align-items-center list-unstyled m-0">
+                    <li class="search-item pe-3">
+                        <a href="#" class="search-button" title="Buscar">
+                            <svg class="search"><use xlink:href="#search"></use></svg>
+                        </a>
+                    </li>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="dropdown pe-3">
+                            <a href="#" class="d-inline-flex align-items-center" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false" title="Mi cuenta">
+                                <svg class="user"><use xlink:href="#user"></use></svg>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                @if (User.IsInRole(Roles.Administrador))
+                                {
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Panel de administración</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Mi perfil</a></li>
+                                <li><a class="dropdown-item" asp-controller="Order" asp-action="Index">Mis pedidos</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                        <button type="submit" class="dropdown-item">Salir</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="pe-3">
+                            <a asp-controller="Account" asp-action="Login" title="Iniciar sesión">
+                                <svg class="user"><use xlink:href="#user"></use></svg>
+                            </a>
+                        </li>
+                    }
+
+                    <li>
+                        <a asp-controller="Cart" asp-action="Index" class="position-relative" title="Carrito">
+                            <svg class="cart"><use xlink:href="#cart"></use></svg>
+                            <span class="js-cart-count badge rounded-pill bg-dark position-absolute top-0 start-100 translate-middle" style="display:none;font-size:.6rem;">0</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <button class="navbar-toggler d-flex d-lg-none border-0 p-2 ms-2" type="button"
+                        data-bs-toggle="offcanvas" data-bs-target="#bdNavbar" aria-controls="bdNavbar"
+                        aria-expanded="false" aria-label="Abrir menú">
+                    <svg class="navbar-icon"><use xlink:href="#navbar-icon"></use></svg>
+                </button>
+            </div>
+
+            <!-- Offcanvas: solo la navegación -->
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="bdNavbar" aria-labelledby="bdNavbarLabel">
                 <div class="offcanvas-header px-4 pb-0">
                     <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                         <img src="~/images/mical-logo.webp" class="logo" alt="Mical — Librería y Regalería Cristiana">
                     </a>
-                    <button type="button" class="btn-close btn-close-black" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-target="#bdNavbar"></button>
+                    <button type="button" class="btn-close btn-close-black" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
-                    <ul id="navbar" class="navbar-nav text-uppercase justify-content-end align-items-center flex-grow-1 pe-3">
+                    <ul id="navbar" class="navbar-nav text-uppercase align-items-lg-center flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link me-4 active" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                            <a class="nav-link me-lg-4 active" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-4" href="#company-services">Servicios</a>
+                            <a class="nav-link me-lg-4" href="#company-services">Servicios</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-4" asp-controller="Shop" asp-action="Index">Tienda</a>
+                            <a class="nav-link me-lg-4" asp-controller="Shop" asp-action="Index">Tienda</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-4" href="#latest-blog">Novedades</a>
-                        </li>
-                        <li class="nav-item">
-                            <div class="user-items ps-5">
-                                <ul class="d-flex justify-content-end list-unstyled">
-                                    <li class="search-item pe-3">
-                                        <a href="#" class="search-button">
-                                            <svg class="search"><use xlink:href="#search"></use></svg>
-                                        </a>
-                                    </li>
-                                    @if (User.Identity?.IsAuthenticated == true)
-                                    {
-                                        @if (User.IsInRole(Roles.Administrador))
-                                        {
-                                            <li class="pe-3">
-                                                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" title="Panel de administración" class="small fw-bold text-reset text-decoration-none">Panel</a>
-                                            </li>
-                                        }
-                                        <li class="pe-3">
-                                            <a asp-controller="Order" asp-action="Index" title="Mis pedidos" class="small text-reset text-decoration-none">Mis pedidos</a>
-                                        </li>
-                                        <li class="pe-3">
-                                            <a asp-controller="Account" asp-action="Profile" title="Mi perfil">
-                                                <svg class="user"><use xlink:href="#user"></use></svg>
-                                            </a>
-                                        </li>
-                                        <li class="pe-3">
-                                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                                                <button type="submit" class="btn btn-link p-0 text-reset text-decoration-none" title="Cerrar sesión">Salir</button>
-                                            </form>
-                                        </li>
-                                    }
-                                    else
-                                    {
-                                        <li class="pe-3">
-                                            <a asp-controller="Account" asp-action="Login" title="Iniciar sesión">
-                                                <svg class="user"><use xlink:href="#user"></use></svg>
-                                            </a>
-                                        </li>
-                                    }
-                                    <li>
-                                        <a asp-controller="Cart" asp-action="Index" class="position-relative" title="Carrito">
-                                            <svg class="cart"><use xlink:href="#cart"></use></svg>
-                                            <span class="js-cart-count badge rounded-pill bg-dark position-absolute top-0 start-100 translate-middle" style="display:none;font-size:.6rem;">0</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+                            <a class="nav-link me-lg-4" href="#latest-blog">Novedades</a>
                         </li>
                     </ul>
                 </div>
