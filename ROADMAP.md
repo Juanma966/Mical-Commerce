@@ -6,7 +6,7 @@
 
 **Leyenda:** ✅ hecho · 🔄 en progreso · ⬜ pendiente · ⏸️ bloqueado
 
-**Última actualización:** 2026-07-08 — Fases 0-8 cerradas. **Mejoras v1.0: 15 de 16 pasos hechos** (M9 fuera de alcance; ver sección al final).
+**Última actualización:** 2026-09-20 — Fases 0-8 cerradas. **Mejoras v1.0: 15 de 16 pasos hechos** (M9 fuera de alcance; ver sección al final). **Suite de tests del `OrderService` incorporada** (ver sección Testing).
 
 ---
 
@@ -183,6 +183,45 @@
 
 ---
 
+## Testing
+
+> Primer testing automatizado del repo. Hasta acá la validación fue manual y quedó documentada
+> en esta bitácora; ahora la lógica de negocio con plata adentro tiene red.
+
+Proyecto `Mical.Tests/` (xUnit + **Testcontainers.PostgreSql**) + solución `Mical.sln`.
+Se corre con `dotnet test` desde la raíz. **Requiere Docker Desktop encendido.**
+
+**Por qué PostgreSQL real y no el provider InMemory de EF:** el checkout depende de
+`BeginTransactionAsync` + rollback, del SQL crudo `nextval('order_number_seq')` y del token
+de concurrencia `xmin`. InMemory **ignora las transacciones en silencio**, así que un test de
+rollback contra InMemory daría verde sin haber probado nada.
+
+- `PostgresFixture` levanta un `postgres:16-alpine` descartable por corrida y le aplica las
+  migraciones reales (`Database.MigrateAsync()`). Entre tests, `TRUNCATE ... RESTART IDENTITY
+  CASCADE` + reinicio de las secuencias.
+- **Las aserciones siempre abren un contexto nuevo**, para leer lo que realmente llegó a la
+  base y no el change tracker.
+
+**28 tests, todos verdes (~12s la primera corrida, ~3-5s con la imagen cacheada):**
+
+| Archivo | Cubre |
+|---|---|
+| `CheckoutTests.cs` | Alta + descuento de stock, `SalePrice` sobre `Price`, snapshot del nombre, **rollback multi-línea sin tocar ningún stock**, producto inactivo / categoría desactivada / soft-deleted, carrito vacío o JSON inválido, cantidades ≤ 0 descartadas, merge de líneas duplicadas, correlativo `ORD-yyyy-000001/2`. |
+| `OrderStatusTests.cs` | Transición legal, saltos rechazados sin cambiar el estado, `Cancelado` terminal, cancelar desde `Pagado` repone stock, **cancelar desde `Entregado` NO repone**, repone aun con el producto soft-deleted, pedido inexistente. |
+| `OrderOwnershipTests.cs` | Dueño sí / ajeno `null`, historial propio ordenado, listado admin con email del cliente, `AllowedTransitions` del detalle admin. |
+
+**Validados por mutación:** se rompieron a propósito `current != OrderStatus.Entregado` y
+`SalePrice ?? Price` → fallaron exactamente esos 2 tests y ningún otro. Un test verde no vale
+hasta verlo fallar.
+
+**Sigue sin cubrirse (honestidad sobre el alcance):** la carrera de concurrencia real (dos
+checkouts simultáneos por la última unidad). El `xmin` + retry están implementados y la suite
+verifica el camino feliz, pero la contención simultánea no se orquesta.
+
+**Pendiente:** CI que corra `dotnet test` en cada push — una suite sin CI se pudre.
+
+---
+
 ## Bitácora
 | Fecha | Tarea | Nota |
 |---|---|---|
@@ -213,3 +252,4 @@
 | 2026-07-08 | Mejoras v1.0 · M11-M13 | Flag `IsFeatured`, banner de promociones (CRUD + solo visuales), dashboard mejorado con gráfico. **Tier 3 cerrado.** (migraciones aplicadas) |
 | 2026-07-08 | Mejoras v1.0 · M14-M15 | WebP automático (ImageSharp), sitemap.xml + robots.txt dinámicos. |
 | 2026-07-08 | Mejoras v1.0 · M16 | Recuperación de contraseña por email con Resend (abstracción `IEmailService`, plantilla HTML, flujo Forgot/Reset con token de Identity). Requiere `Resend:ApiToken` en user-secrets. **Solo M9 queda fuera de alcance.** |
+| 2026-09-20 | Testing | Proyecto `Mical.Tests` (xUnit + Testcontainers sobre `postgres:16-alpine`) + `Mical.sln`. 28 tests del `OrderService`: checkout con descuento y **rollback**, máquina de estados, reposición condicionada al cancelar, aislamiento por usuario. Validados por mutación. Pendiente: CI. |
