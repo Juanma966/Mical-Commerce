@@ -1,3 +1,4 @@
+using Mical.Helpers;
 using Mical.Services.Interfaces;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
@@ -16,12 +17,17 @@ public class FileStorageService : IFileStorageService
     private const int MaxWidth = 1600;
     private const int WebpQuality = 80;
 
-    private readonly IWebHostEnvironment _env;
+    // Raíz física de las imágenes subidas. En producción apunta a un volumen
+    // montado (Storage:UploadsPath); el filesystem del contenedor es efímero.
+    private readonly string _uploadsRoot;
     private readonly ILogger<FileStorageService> _logger;
 
-    public FileStorageService(IWebHostEnvironment env, ILogger<FileStorageService> logger)
+    public FileStorageService(
+        IWebHostEnvironment env,
+        IConfiguration configuration,
+        ILogger<FileStorageService> logger)
     {
-        _env = env;
+        _uploadsRoot = HostingConfig.ResolveUploadsRoot(configuration, env.WebRootPath);
         _logger = logger;
     }
 
@@ -48,7 +54,7 @@ public class FileStorageService : IFileStorageService
         // Normaliza la subcarpeta (evita rutas fuera de uploads/).
         subfolder = string.IsNullOrWhiteSpace(subfolder) ? "misc" : Path.GetFileName(subfolder);
 
-        var folderAbsolute = Path.Combine(_env.WebRootPath, UploadsRoot, subfolder);
+        var folderAbsolute = Path.Combine(_uploadsRoot, subfolder);
         Directory.CreateDirectory(folderAbsolute);
 
         // Nombre regenerado con GUID: evita colisiones y nombres maliciosos.
@@ -85,10 +91,17 @@ public class FileStorageService : IFileStorageService
             return;
 
         // Solo se permite borrar dentro de uploads/ (defensa ante rutas raras).
-        if (!relativePath.Replace('\\', '/').StartsWith(UploadsRoot + "/", StringComparison.OrdinalIgnoreCase))
+        var normalized = relativePath.Replace('\\', '/');
+        if (!normalized.StartsWith(UploadsRoot + "/", StringComparison.OrdinalIgnoreCase))
             return;
 
-        var absolutePath = Path.Combine(_env.WebRootPath, relativePath.Replace('/', Path.DirectorySeparatorChar));
+        // La ruta guardada es "uploads/<sub>/<archivo>"; la raíz física ya es uploads/.
+        var withinUploads = normalized[(UploadsRoot.Length + 1)..];
+        var absolutePath = Path.Combine(_uploadsRoot, withinUploads.Replace('/', Path.DirectorySeparatorChar));
+
+        // Defensa en profundidad: nunca salir de la raíz de uploads.
+        if (!absolutePath.StartsWith(_uploadsRoot, StringComparison.Ordinal))
+            return;
         try
         {
             if (File.Exists(absolutePath))

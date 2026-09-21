@@ -1,0 +1,19 @@
+# Keep the build context small and never ship local state into the image.
+**/bin/
+**/obj/
+**/TestResults/
+**/logs/
+
+.git/
+.github/
+.vs/
+.vscode/
+
+Mical.Tests/
+Mical.sln
+
+.env
+**/appsettings.Development.json
+
+*.md
+docker-compose.yml

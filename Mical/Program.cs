@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.FileProviders;
 using Mical.Data;
 using Mical.Data.Interceptors;
 using Mical.Data.Seed;
@@ -22,6 +23,13 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    // Plataformas tipo Railway asignan el puerto por la variable PORT y esperan
+    // que la app escuche ahí; si no, el health check nunca pasa. Un ASPNETCORE_URLS
+    // explícito tiene prioridad y no se pisa.
+    var bindUrl = HostingConfig.BindUrlFromPortVariable(builder.Configuration);
+    if (bindUrl is not null)
+        builder.WebHost.UseUrls(bindUrl);
 
     // Serilog como pipeline de logging, configurable desde appsettings.json.
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -57,10 +65,8 @@ try
 
     // Base de datos: PostgreSQL vía EF Core (Npgsql).
     // La cadena de conexión se resuelve desde configuración/entorno (nunca hardcodeada).
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException(
-            "No se encontró la cadena de conexión 'DefaultConnection'. " +
-            "Configurala con user-secrets (dev) o variables de entorno (prod).");
+    // Acepta además el DATABASE_URL que publican las plataformas tipo Railway.
+    var connectionString = HostingConfig.ResolveConnectionString(builder.Configuration);
 
     // Interceptor de auditoría (registra acciones de admin en AuditLogs).
     builder.Services.AddScoped<AuditSaveChangesInterceptor>();
@@ -126,12 +132,17 @@ try
     }
     else
     {
-        // Detrás de un proxy inverso (nginx, etc.): respeta X-Forwarded-For/Proto
-        // para que HTTPS redirect, la cookie Secure y la IP del rate limiter sean correctas.
-        // IMPORTANTE: en un despliegue real, restringir KnownProxies/KnownNetworks al proxy.
+        // Detrás de un proxy inverso: respeta X-Forwarded-For/Proto para que el
+        // HTTPS redirect, la cookie Secure y la IP del rate limiter sean correctas.
+        //
+        // En un PaaS (Railway, Render, Fly) el edge tiene IPs dinámicas y no se
+        // pueden enumerar, así que KnownProxies/KnownNetworks van vacíos. El límite
+        // de un solo hop hace que solo se honre la entrada que agrega ese edge.
+        // Si algún día se despliega sobre un proxy propio con IP fija, restringir acá.
         var fwd = new ForwardedHeadersOptions
         {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            ForwardLimit = 1
         };
         fwd.KnownNetworks.Clear();
         fwd.KnownProxies.Clear();
@@ -150,6 +161,17 @@ try
 
     app.UseHttpsRedirection();
     app.UseSecurityHeaders();
+
+    // Las imágenes subidas se sirven desde su raíz física (un volumen montado en
+    // producción), pero conservan la misma URL /uploads/... que ya está guardada
+    // en la base. Va antes del UseStaticFiles general para que gane esta ruta.
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+            HostingConfig.ResolveUploadsRoot(app.Configuration, app.Environment.WebRootPath)),
+        RequestPath = HostingConfig.UploadsRequestPath
+    });
+
     app.UseStaticFiles();
 
     // Cultura invariante: los <input type="number"> envían decimales con punto
@@ -178,9 +200,15 @@ try
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
 
-    // Seed inicial: roles de la aplicación + administrador. Idempotente.
+    // Arranque de la base: aplica las migraciones pendientes y luego siembra
+    // roles + administrador. Ambas cosas son idempotentes. En un PaaS no hay una
+    // shell donde correr `dotnet ef database update` a mano, así que migrar acá
+    // es lo que hace que un deploy limpio levante contra una base vacía.
     using (var scope = app.Services.CreateScope())
     {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync();
+
         await DbInitializer.SeedAsync(scope.ServiceProvider);
     }
 
