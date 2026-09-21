@@ -218,7 +218,10 @@ hasta verlo fallar.
 checkouts simultáneos por la última unidad). El `xmin` + retry están implementados y la suite
 verifica el camino feliz, pero la contención simultánea no se orquesta.
 
-**Pendiente:** CI que corra `dotnet test` en cada push — una suite sin CI se pudre.
+**CI:** `.github/workflows/ci.yml` corre restore + build en Release + `dotnet test` en cada push
+y cada PR a `master`, sobre `ubuntu-latest`. Los runners de GitHub ya traen un daemon de Docker,
+así que Testcontainers levanta su `postgres:16-alpine` sin necesidad de un service container.
+Cachea los paquetes NuGet y sube los resultados (`.trx`) como artefacto.
 
 ---
 
