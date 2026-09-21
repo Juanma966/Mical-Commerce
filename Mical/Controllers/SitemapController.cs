@@ -23,10 +23,16 @@ public class SitemapController : Controller
         var data = await _catalog.GetSitemapDataAsync();
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
 
-        var sb = new StringBuilder();
+        // StringWriter en vez de StringBuilder: XmlWriter toma la codificación de la
+        // declaración del writer, y un StringBuilder siempre reporta UTF-16 aunque
+        // después la respuesta se emita en UTF-8.
+        var sb = new Utf8StringWriter();
         var settings = new XmlWriterSettings { Indent = true, Encoding = new UTF8Encoding(false) };
 
-        await using (var writer = XmlWriter.Create(sb, settings))
+        // Disposición sincrónica a propósito: las escrituras de abajo son sync, y
+        // DisposeAsync() exigiría XmlWriterSettings.Async = true, que a su vez hace
+        // que los métodos sincrónicos tiren excepción.
+        using (var writer = XmlWriter.Create(sb, settings))
         {
             writer.WriteStartDocument();
             writer.WriteStartElement("urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
@@ -64,5 +70,14 @@ public class SitemapController : Controller
             writer.WriteElementString("lastmod", lastMod.Value.ToUniversalTime().ToString("yyyy-MM-dd"));
         writer.WriteElementString("priority", priority);
         writer.WriteEndElement();
+    }
+
+    /// <summary>
+    /// StringWriter que declara UTF-8. Sin esto el sitemap sale con
+    /// <c>encoding="utf-16"</c> en la declaración aunque los bytes vayan en UTF-8.
+    /// </summary>
+    private sealed class Utf8StringWriter : StringWriter
+    {
+        public override Encoding Encoding => Encoding.UTF8;
     }
 }
