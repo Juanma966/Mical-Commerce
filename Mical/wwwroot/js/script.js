@@ -58,14 +58,6 @@
       searchPopup();
       initProductQty();
 
-      var swiper = new Swiper(".main-swiper", {
-        speed: 500,
-        navigation: {
-          nextEl: ".swiper-arrow-prev",
-          prevEl: ".swiper-arrow-next",
-        },
-      });         
-
       // Productos destacados de la home. En teléfono se muestra UN producto por
       // vista (la ficha completa, legible) y se pasa al siguiente deslizando;
       // dos productos por pantalla quedaban ilegibles. 768px es el corte de móvil
@@ -93,14 +85,6 @@
           }
         },
       });
-
-      var swiper = new Swiper(".testimonial-swiper", {
-        loop: true,
-        navigation: {
-          nextEl: ".swiper-arrow-prev",
-          prevEl: ".swiper-arrow-next",
-        },
-      }); 
 
     }); // End of a document ready
 
