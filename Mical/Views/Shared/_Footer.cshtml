@@ -1,6 +1,23 @@
 @*
-    Pie del sitio público. Adaptado de MiniStore.
+    Pie del sitio público.
+
+    Los datos de contacto NO se escriben acá: salen de la sección `Business` de
+    appsettings.json, para que el número, el mail y el perfil de Instagram tengan
+    una sola fuente de verdad (el botón flotante de WhatsApp lee el mismo número).
+
+      Business:WhatsAppNumber       solo dígitos, para armar los enlaces wa.me
+      Business:ContactPhoneDisplay  cómo se muestra el número en pantalla
+      Business:ContactEmail         mail de contacto
+      Business:InstagramUrl         URL del perfil; vacía = no se renderiza el bloque
 *@
+@inject IConfiguration Configuration
+@{
+    var waDigits = WhatsAppHelper.DigitsOnly(Configuration["Business:WhatsAppNumber"]);
+    var phoneDisplay = Configuration["Business:ContactPhoneDisplay"];
+    var contactEmail = Configuration["Business:ContactEmail"];
+    var instagramUrl = Configuration["Business:InstagramUrl"];
+    var waConsulta = Uri.EscapeDataString("¡Hola! Quería hacer una consulta sobre un producto de Mical.");
+}
 <footer id="footer" class="overflow-hidden">
     <div class="container">
         <div class="row">
@@ -10,45 +27,42 @@
                         <div class="footer-menu">
                             <img src="~/images/mical-logo.webp" class="footer-logo" alt="Mical — Librería y Regalería Cristiana" loading="lazy" decoding="async">
                             <p>Regalería e imprenta. Productos con diseño para toda ocasión.</p>
-                            <div class="social-links">
-                                <ul class="d-flex list-unstyled">
-                                    <li><a href="#"><svg class="facebook"><use xlink:href="#facebook" /></svg></a></li>
-                                    <li><a href="#"><svg class="instagram"><use xlink:href="#instagram" /></svg></a></li>
-                                    <li><a href="#"><svg class="twitter"><use xlink:href="#twitter" /></svg></a></li>
-                                    <li><a href="#"><svg class="linkedin"><use xlink:href="#linkedin" /></svg></a></li>
-                                    <li><a href="#"><svg class="youtube"><use xlink:href="#youtube" /></svg></a></li>
-                                </ul>
-                            </div>
+                            @if (!string.IsNullOrWhiteSpace(instagramUrl))
+                            {
+                                <div class="social-links">
+                                    <a class="d-inline-flex align-items-center gap-2" href="@instagramUrl"
+                                       target="_blank" rel="noopener">
+                                        <svg class="instagram"><use xlink:href="#instagram" /></svg>
+                                        <span>Seguinos en Instagram</span>
+                                    </a>
+                                </div>
+                            }
                         </div>
                     </div>
-                    <div class="col-lg-2 col-sm-6 pb-3">
+                    <div class="col-lg-3 col-sm-6 pb-3">
                         <div class="footer-menu text-uppercase">
                             <h5 class="widget-title pb-2">Enlaces</h5>
                             <ul class="menu-list list-unstyled text-uppercase">
                                 <li class="menu-item pb-2"><a asp-area="" asp-controller="Home" asp-action="Index">Inicio</a></li>
-                                <li class="menu-item pb-2"><a href="#">Productos</a></li>
-                                <li class="menu-item pb-2"><a href="#">Nosotros</a></li>
-                                <li class="menu-item pb-2"><a href="#">Contacto</a></li>
+                                <li class="menu-item pb-2"><a asp-controller="Shop" asp-action="Index">Productos</a></li>
+                                <li class="menu-item pb-2"><a href="#contacto">Contacto</a></li>
                             </ul>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-sm-6 pb-3">
-                        <div class="footer-menu text-uppercase">
-                            <h5 class="widget-title pb-2">Ayuda e info</h5>
-                            <ul class="menu-list list-unstyled">
-                                <li class="menu-item pb-2"><a href="#">Seguí tu pedido</a></li>
-                                <li class="menu-item pb-2"><a href="#">Cambios y devoluciones</a></li>
-                                <li class="menu-item pb-2"><a href="#">Envíos</a></li>
-                                <li class="menu-item pb-2"><a href="#">Contacto</a></li>
-                                <li class="menu-item pb-2"><a href="#">Preguntas frecuentes</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6 pb-3">
-                        <div class="footer-menu contact-item">
+                    <div class="col-lg-4 col-sm-6 pb-3">
+                        <div id="contacto" class="footer-menu contact-item">
                             <h5 class="widget-title text-uppercase pb-2">Contacto</h5>
-                            <p>¿Tenés consultas o sugerencias? <a href="mailto:">info@mical.com</a></p>
-                            <p>¿Necesitás ayuda? Llamanos. <a href="">+54 11 2222 3333</a></p>
+                            @if (!string.IsNullOrWhiteSpace(contactEmail))
+                            {
+                                <p>¿Tenés consultas o sugerencias? <a href="mailto:@contactEmail">@contactEmail</a></p>
+                            }
+                            @if (waDigits.Length > 0)
+                            {
+                                <p>
+                                    Escribinos por WhatsApp:
+                                    <a href="https://wa.me/@waDigits?text=@waConsulta" target="_blank" rel="noopener">@phoneDisplay</a>
+                                </p>
+                            }
                         </div>
                     </div>
                 </div>
@@ -59,28 +73,13 @@
 </footer>
 <div id="footer-bottom">
     <div class="container">
-        <div class="row d-flex flex-wrap justify-content-between">
-            <div class="col-md-4 col-sm-6">
-                <div class="Shipping d-flex">
-                    <p>Enviamos con:</p>
-                    <div class="card-wrap ps-2">
-                        <img src="~/images/dhl.png" alt="envío" loading="lazy" decoding="async">
-                        <img src="~/images/shippingcard.png" alt="envío" loading="lazy" decoding="async">
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="payment-method d-flex">
-                    <p>Medios de pago:</p>
-                    <div class="card-wrap ps-2">
-                        <img src="~/images/visa.jpg" alt="visa" loading="lazy" decoding="async">
-                        <img src="~/images/mastercard.jpg" alt="mastercard" loading="lazy" decoding="async">
-                        <img src="~/images/paypal.jpg" alt="paypal" loading="lazy" decoding="async">
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="copyright">
+        @* Se quitaron "Enviamos con:" y "Medios de pago:" con sus íconos: eran
+           logos de la plantilla (DHL, Visa, Mastercard, PayPal) que no se
+           corresponden con los medios reales del negocio. El copyright queda solo
+           y centrado. *@
+        <div class="row">
+            <div class="col-12">
+                <div class="copyright text-center">
                     <p>© @DateTime.Now.Year Mical. Todos los derechos reservados.</p>
                 </div>
             </div>
