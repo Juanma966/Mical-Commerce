@@ -785,7 +785,10 @@ h3.cart-title {
 
 /* 4. Product
 /*----------------------------------------------*/
-.product-store .product-card .cart-concern {
+/* La ficha de producto (_ProductCard) se usa en la home, en /shop y en los
+   relacionados, así que sus reglas NO se scopean a .product-store: el componente
+   tiene que verse igual en cualquier sección que lo incluya. */
+.product-card .cart-concern {
     bottom: 75px;
     width: 100%;
     display: flex;
@@ -795,7 +798,7 @@ h3.cart-title {
     transition: all 0.3s ease-out;
     opacity: 0;
 }
-.product-store .product-card:hover .cart-concern {
+.product-card:hover .cart-concern {
     bottom: 90px;
     opacity: 1;
 }
@@ -810,7 +813,7 @@ h3.cart-title {
 }
 
 @media only screen and (max-width: 575px) {
-  .product-store .product-card .card-detail {
+  .product-card .card-detail {
       padding: 10px;
   }
 }
@@ -1460,7 +1463,7 @@ figure.instagram-item img.insta-image {
    hover: lo primero cubre los teléfonos de forma predecible, lo segundo las
    tablets táctiles anchas, que también carecen de hover. */
 @media (max-width: 767.98px), (hover: none) {
-    .product-store .product-card .cart-concern {
+    .product-card .cart-concern {
         position: static !important;
         opacity: 1;
         bottom: auto;

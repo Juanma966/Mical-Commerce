@@ -1,0 +1,81 @@
+@*
+    Ficha de producto. ÚNICA en todo el sitio: la usan la home (destacados),
+    /shop y los productos relacionados del detalle.
+
+    Incluye imagen enlazada al detalle, badge de estado (sin stock / oferta),
+    botón "Agregar al carrito" y el bloque de precios con el mayorista.
+
+    La vista que la incluye aporta SOLO el envoltorio de layout — la columna de
+    la grilla o el .swiper-slide del carrusel. La ficha no sabe nada de grillas.
+
+        <div class="col-6 col-md-4">
+            <partial name="_ProductCard" model="item" />
+        </div>
+
+    Sus estilos están en css/style.css sección 4 (.product-card), sin scopear a
+    ninguna sección, justamente para que se vea igual donde se la use.
+
+    Modelo: ProductCardVm.
+*@
+@model ProductCardVm
+
+<div class="product-card position-relative h-100">
+    <div class="image-holder position-relative bg-light" style="aspect-ratio:1/1;overflow:hidden;">
+        <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Id" class="d-block h-100">
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="~/@Model.ImagePath" alt="@Model.Name" class="w-100 h-100"
+                     style="object-fit:cover;" loading="lazy" decoding="async">
+            }
+            else
+            {
+                @* Sin imagen: se reserva el mismo espacio para que la grilla no salte. *@
+                <span class="d-block w-100 h-100"></span>
+            }
+        </a>
+
+        @if (Model.IsOutOfStock)
+        {
+            <span class="badge bg-danger position-absolute top-0 start-0 m-2">Sin stock</span>
+        }
+        else if (Model.IsOnSale)
+        {
+            <span class="badge bg-success position-absolute top-0 start-0 m-2">Oferta</span>
+        }
+    </div>
+
+    @if (!Model.IsOutOfStock)
+    {
+        @* En desktop aparece al hacer hover; en táctil queda fijo (style.css §17),
+           porque sin hover el botón era inalcanzable. *@
+        <div class="cart-concern position-absolute">
+            <div class="cart-button d-flex">
+                <a href="#" class="btn btn-medium btn-black js-add-to-cart"
+                   data-product-id="@Model.Id" data-product-name="@Model.Name">
+                    Agregar al carrito<svg class="cart-outline"><use xlink:href="#cart-outline"></use></svg>
+                </a>
+            </div>
+        </div>
+    }
+
+    <div class="card-detail pt-3">
+        @* Título y precio comparten la fila; el mayorista va DEBAJO, no al lado.
+           Por eso el flex envuelve solo a esos dos y no a todo el bloque. *@
+        @* flex-wrap, y el precio sin text-nowrap: en una ficha angosta con oferta
+           son dos importes ("$2.500,00 $1.990,00") que no entran al lado del
+           título y desbordaban la tarjeta. Si no caben, el precio baja de línea. *@
+        <div class="d-flex justify-content-between align-items-baseline gap-2 flex-wrap">
+            <h3 class="card-title text-uppercase mb-0">
+                <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Id">@Model.Name</a>
+            </h3>
+            <span class="item-price text-primary">
+                @if (Model.IsOnSale)
+                {
+                    <span class="text-decoration-line-through text-muted me-1">@Model.Price.ToMoney()</span>
+                }
+                @Model.EffectivePrice.ToMoney()
+            </span>
+        </div>
+        <partial name="_WholesalePrice" model="Model.WholesalePrice" />
+    </div>
+</div>

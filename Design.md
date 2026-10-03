@@ -54,6 +54,14 @@ El **área Admin** tiene su propio layout: `Areas/Admin/Views/Shared/_AdminLayou
 `#latest-blog` · `#testimonials` · `#subscribe` · `#instagram`.
 Se pueden **editar o borrar** secciones enteras sin romper el resto.
 
+**Partials compartidos** (`Views/Shared/`):
+| Partial | Qué es |
+|---|---|
+| `_ProductCard` | **La única ficha de producto.** Home, `/shop` y relacionados. Ver §8. |
+| `_WholesalePrice` | Precio mayorista, debajo del precio al cliente. Ver §8. |
+| `_Layout` · `_Header` · `_Footer` · `_IconSprite` | Estructura global. |
+| `_WhatsAppFloat` | Botón flotante de WhatsApp. |
+
 **Admin** (`Areas/Admin/Views/`): `Dashboard/`, `Categories/`, `Products/`, `Orders/`.
 
 ---
@@ -196,6 +204,42 @@ Del logo de Mical:
 
 Estas piezas ya existen: **reusalas** en vez de reinventarlas.
 
+### Ficha de producto — `Views/Shared/_ProductCard.cshtml` ⭐
+
+**Es la ÚNICA ficha de producto del sitio.** La usan la home (destacados), `/shop` y
+los relacionados del detalle. Si querés cambiar cómo se ve un producto en una grilla,
+se toca **acá y en ningún otro lado**.
+
+```cshtml
+@* La vista aporta solo el envoltorio de layout; la ficha no sabe de grillas. *@
+<div class="col-6 col-md-4">
+    <partial name="_ProductCard" model="item" />
+</div>
+```
+
+- **Modelo:** `ProductCardVm`. Si necesitás un dato nuevo en la ficha, agregalo al VM
+  y mapealo en las proyecciones de `CatalogService` (hay 3 de `ProductCardVm` + 1 de
+  `ProductDetailVm`).
+- **Trae ya resuelto:** imagen enlazada al detalle (con placeholder si no hay),
+  badge *Sin stock* / *Oferta*, botón "Agregar al carrito" (se omite si no hay stock)
+  y el bloque de precios con el mayorista.
+- **Estilos:** `style.css` sección 4 (`.product-card`). **No están scopeados a ninguna
+  sección** a propósito: la ficha tiene que verse igual donde se la incluya. No vuelvas
+  a prefijarlos con `.product-store`.
+- **Ojo al agregar algo a la fila de título/precio:** ese `d-flex` lleva `flex-wrap` y el
+  precio **no** lleva `text-nowrap`. En una ficha angosta con oferta son dos importes que
+  no entran al lado del título y desbordaban la tarjeta.
+
+### Precio mayorista — `Views/Shared/_WholesalePrice.cshtml`
+
+```cshtml
+<partial name="_WholesalePrice" model="item.WholesalePrice" />
+```
+`@model decimal?`. No renderiza nada si es `null` (productos cargados antes de que
+existiera el campo). Ya viene incluido dentro de `_ProductCard`: solo se incluye a mano
+en el precio grande del detalle de producto. Va **debajo** del precio al cliente, nunca
+al lado.
+
 ### Toasts y Loader — `wwwroot/js/ui.js` → `window.UI`
 ```js
 UI.toast("Producto agregado al carrito", "success"); // success | error | warning | info
@@ -212,6 +256,8 @@ UI.loader.hide();   // se oculta cuando todas las tareas terminaron
 
 ### Botón "Agregar al carrito"
 Botón con `class="js-add-to-cart"` + `data-product-id` (y opcional `data-product-name` para el toast, `data-qty-target="#selector"` para leer la cantidad). Lo maneja `cart.js` (delegado).
+> En las grillas **ya viene dentro de `_ProductCard`**; no lo agregues aparte. Se escribe
+> a mano solo en el detalle de producto, donde hay selector de cantidad.
 
 ### Botón "Volver a pedir"
 `class="js-reorder"` + `data-reorder-id="@order.Id"`. `cart.js` consulta `/order/reorder/{id}`, carga los ítems disponibles y redirige a `/cart`.
