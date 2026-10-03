@@ -66,15 +66,24 @@
         },
       });         
 
+      // Productos destacados de la home. En teléfono se muestra UN producto por
+      // vista (la ficha completa, legible) y se pasa al siguiente deslizando;
+      // dos productos por pantalla quedaban ilegibles. 768px es el corte de móvil
+      // que ya usa el resto del sitio (ver carrito responsive en style.css).
       var swiper = new Swiper(".product-swiper", {
         slidesPerView: 4,
         spaceBetween: 10,
+        grabCursor: true,
         pagination: {
           el: "#mobile-products .swiper-pagination",
           clickable: true,
         },
         breakpoints: {
           0: {
+            slidesPerView: 1,
+            spaceBetween: 16,
+          },
+          768: {
             slidesPerView: 2,
             spaceBetween: 20,
           },
@@ -83,7 +92,7 @@
             spaceBetween: 20,
           }
         },
-      });      
+      });
 
       var swiper = new Swiper(".product-watch-swiper", {
         slidesPerView: 4,

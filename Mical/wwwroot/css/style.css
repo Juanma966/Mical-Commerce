@@ -1454,6 +1454,20 @@ figure.instagram-item img.insta-image {
 
 /* 17. Ajustes táctiles/móvil generales
 --------------------------------------------------------------*/
+/* En un dispositivo táctil no hay :hover, así que el botón "Agregar al carrito"
+   de las fichas de producto quedaba con opacity: 0 y era inalcanzable.
+   Se aplica por ancho (el corte de móvil del resto del sitio) Y por falta de
+   hover: lo primero cubre los teléfonos de forma predecible, lo segundo las
+   tablets táctiles anchas, que también carecen de hover. */
+@media (max-width: 767.98px), (hover: none) {
+    .product-store .product-card .cart-concern {
+        position: static !important;
+        opacity: 1;
+        bottom: auto;
+        margin-top: 0.75rem;
+    }
+}
+
 @media (max-width: 575.98px) {
     /* Los carruseles de productos no deben sangrar fuera de la pantalla. */
     .product-swiper { padding-bottom: 2.5rem; }
