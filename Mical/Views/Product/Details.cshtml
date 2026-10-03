@@ -52,6 +52,7 @@
                     {
                         <span class="fs-3 fw-bold">@Model.EffectivePrice.ToMoney()</span>
                     }
+                    <partial name="_WholesalePrice" model="Model.WholesalePrice" />
                 </div>
 
                 @if (Model.IsOutOfStock)
@@ -120,6 +121,7 @@
                                                 <strong>@item.EffectivePrice.ToMoney()</strong>
                                             }
                                         </div>
+                                        <partial name="_WholesalePrice" model="item.WholesalePrice" />
                                     </div>
                                 </a>
                             </div>

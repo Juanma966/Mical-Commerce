@@ -1,0 +1,19 @@
+@*
+    Precio mayorista, debajo del precio que ve el cliente.
+
+    Se usa como partial en las cards del catálogo y en el detalle para no repetir
+    el markup en los cinco lugares donde se renderiza un precio. No renderiza nada
+    si el producto no tiene el dato: los cargados antes de incorporar el campo
+    quedan sin la línea hasta que se los edite.
+
+    Modelo: el precio mayorista (decimal?).
+*@
+@model decimal?
+
+@if (Model.HasValue)
+{
+    <div class="product-wholesale small text-muted">
+        <span class="product-wholesale__label">Precio mayorista:</span>
+        <span class="product-wholesale__value">@Model.Value.ToMoney()</span>
+    </div>
+}

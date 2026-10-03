@@ -45,6 +45,7 @@ public class CatalogService : ICatalogService
                 ImagePath = p.ImagePath,
                 Price = p.Price,
                 EffectivePrice = p.SalePrice ?? p.Price,
+                WholesalePrice = p.WholesalePrice,
                 IsOnSale = p.SalePrice != null && p.SalePrice < p.Price,
                 IsOutOfStock = p.Stock <= 0
             })
@@ -89,6 +90,7 @@ public class CatalogService : ICatalogService
                 ImagePath = p.ImagePath,
                 Price = p.Price,
                 EffectivePrice = p.SalePrice ?? p.Price,
+                WholesalePrice = p.WholesalePrice,
                 IsOnSale = p.SalePrice != null && p.SalePrice < p.Price,
                 IsOutOfStock = p.Stock <= 0
             })
@@ -204,6 +206,7 @@ public class CatalogService : ICatalogService
                 ImagePath = p.ImagePath,
                 Price = p.Price,
                 EffectivePrice = p.SalePrice ?? p.Price,
+                WholesalePrice = p.WholesalePrice,
                 IsOnSale = p.SalePrice != null && p.SalePrice < p.Price,
                 Stock = p.Stock,
                 IsOutOfStock = p.Stock <= 0,
@@ -255,6 +258,7 @@ public class CatalogService : ICatalogService
                 ImagePath = p.ImagePath,
                 Price = p.Price,
                 EffectivePrice = p.SalePrice ?? p.Price,
+                WholesalePrice = p.WholesalePrice,
                 IsOnSale = p.SalePrice != null && p.SalePrice < p.Price,
                 IsOutOfStock = p.Stock <= 0
             })

@@ -37,6 +37,7 @@ public class ProductService : IProductService
                 CategoryName = p.Category!.Name,
                 Price = p.Price,
                 SalePrice = p.SalePrice,
+                WholesalePrice = p.WholesalePrice,
                 Stock = p.Stock,
                 MinStock = p.MinStock,
                 IsActive = p.IsActive,
@@ -59,6 +60,7 @@ public class ProductService : IProductService
                 Description = p.Description,
                 Price = p.Price,
                 SalePrice = p.SalePrice,
+                WholesalePrice = p.WholesalePrice,
                 CategoryId = p.CategoryId,
                 Stock = p.Stock,
                 MinStock = p.MinStock,
@@ -82,6 +84,7 @@ public class ProductService : IProductService
                 CategoryName = p.Category!.Name,
                 Price = p.Price,
                 SalePrice = p.SalePrice,
+                WholesalePrice = p.WholesalePrice,
                 Stock = p.Stock,
                 MinStock = p.MinStock,
                 IsActive = p.IsActive,
@@ -112,6 +115,7 @@ public class ProductService : IProductService
             Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim(),
             Price = model.Price,
             SalePrice = model.SalePrice,
+            WholesalePrice = model.WholesalePrice,
             CategoryId = model.CategoryId,
             Stock = model.Stock,
             MinStock = model.MinStock,
@@ -152,6 +156,7 @@ public class ProductService : IProductService
         product.Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
         product.Price = model.Price;
         product.SalePrice = model.SalePrice;
+        product.WholesalePrice = model.WholesalePrice;
         product.CategoryId = model.CategoryId;
         product.Stock = model.Stock;
         product.MinStock = model.MinStock;

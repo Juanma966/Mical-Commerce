@@ -33,6 +33,19 @@ public class ProductFormVmValidator : AbstractValidator<ProductFormVm>
                 .OverridePropertyName(nameof(ProductFormVm.SalePrice));
         });
 
+        // Obligatorio: se muestra debajo del precio al cliente, así que no puede
+        // quedar vacío al cargar o editar un producto.
+        RuleFor(x => x.WholesalePrice)
+            .NotNull().WithMessage("El precio mayorista es obligatorio.");
+
+        When(x => x.WholesalePrice.HasValue, () =>
+        {
+            RuleFor(x => x.WholesalePrice!.Value)
+                .GreaterThan(0).WithMessage("El precio mayorista debe ser mayor a 0.")
+                // Sin esto el error se registra bajo la clave "Value" y la vista no lo ve.
+                .OverridePropertyName(nameof(ProductFormVm.WholesalePrice));
+        });
+
         RuleFor(x => x.Stock)
             .GreaterThanOrEqualTo(0).WithMessage("El stock no puede ser negativo.");
 

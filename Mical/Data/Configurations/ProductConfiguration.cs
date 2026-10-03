@@ -29,6 +29,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.SalePrice)
             .HasPrecision(12, 2);
 
+        builder.Property(p => p.WholesalePrice)
+            .HasPrecision(12, 2);
+
         builder.Property(p => p.ImagePath)
             .HasMaxLength(255);
 

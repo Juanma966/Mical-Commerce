@@ -28,6 +28,10 @@ public class ProductFormVm
     [Display(Name = "Precio de oferta")]
     public decimal? SalePrice { get; set; }
 
+    /// <summary>Obligatorio: se muestra debajo del precio al cliente.</summary>
+    [Display(Name = "Precio mayorista")]
+    public decimal? WholesalePrice { get; set; }
+
     [Display(Name = "Categoría")]
     public int CategoryId { get; set; }
 

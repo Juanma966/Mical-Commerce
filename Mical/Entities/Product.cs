@@ -23,6 +23,13 @@ public class Product : IAuditable, ISoftDeletable
     /// <summary>Precio de oferta opcional (menor a <see cref="Price"/>).</summary>
     public decimal? SalePrice { get; set; }
 
+    /// <summary>
+    /// Precio mayorista, visible debajo del precio al cliente. Es obligatorio en el
+    /// formulario de alta/edición; la columna admite null solo por los productos
+    /// cargados antes de incorporar el campo, que no muestran la línea hasta editarlos.
+    /// </summary>
+    public decimal? WholesalePrice { get; set; }
+
     public int CategoryId { get; set; }
     public Category? Category { get; set; }
 

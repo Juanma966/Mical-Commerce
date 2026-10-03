@@ -9,6 +9,10 @@ public class AdminProductListItemVm
     public string CategoryName { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public decimal? SalePrice { get; set; }
+
+    /// <summary>Precio mayorista. Null en productos cargados antes del campo (hay que editarlos).</summary>
+    public decimal? WholesalePrice { get; set; }
+
     public int Stock { get; set; }
     public int MinStock { get; set; }
     public bool IsActive { get; set; }

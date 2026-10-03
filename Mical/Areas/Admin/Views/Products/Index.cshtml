@@ -23,6 +23,7 @@ else
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th class="text-end">Precio</th>
+                    <th class="text-end">Mayorista</th>
                     <th class="text-end">Stock</th>
                     <th>Estado</th>
                     <th class="text-end">Acciones</th>
@@ -54,6 +55,17 @@ else
                             else
                             {
                                 <span>@p.Price.ToMoney()</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            @if (p.WholesalePrice.HasValue)
+                            {
+                                <span>@p.WholesalePrice.Value.ToMoney()</span>
+                            }
+                            else
+                            {
+                                @* Producto cargado antes del campo: hay que editarlo para completarlo. *@
+                                <span class="badge bg-warning text-dark" title="Editá el producto para completarlo">Falta</span>
                             }
                         </td>
                         <td class="text-end">
